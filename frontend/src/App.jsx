@@ -14,7 +14,8 @@ const App = () => {
         phone: "",
         email: "",
         password: "",
-        retypepassword: ""
+        retypepassword: "",
+        role: "1" // default User
     });
 
     const [signinData, setSigninData] = useState({
@@ -39,7 +40,8 @@ const App = () => {
             phone: "",
             email: "",
             password: "",
-            retypepassword: ""
+            retypepassword: "",
+            role: "1"
         });
     }
 
@@ -73,20 +75,14 @@ const App = () => {
     }
 
     function signin() {
-        /*Connect backend using callApi() function from lib.js
-        Refer lib.js for callApi() parameters*/
-        if (validateSignin())
-            return;
+        if (validateSignin()) return;
 
         setIsProgress(true);
         callApi("POST", apibaseurl + "/authservice/signin", signinData, null, signinResponseHandler);
     }
 
     function signup() {
-        /*Connect backend using callApi() function from lib.js
-        Refer lib.js for callApi() parameters*/
-        if (validateSignup())
-            return;
+        if (validateSignup()) return;
 
         setIsProgress(true);
         callApi("POST", apibaseurl + "/authservice/signup", signupData, null, signupResponseHandler);
@@ -110,7 +106,8 @@ const App = () => {
             phone: "",
             email: "",
             password: "",
-            retypepassword: ""
+            retypepassword: "",
+            role: "1"
         });
         finput.current?.focus();
     }
@@ -122,56 +119,136 @@ const App = () => {
                     <label>{isSignin ? "Login" : "Create Account"}</label>
                     <img src={imgurl + "logo.png"} alt='' />
                 </div>
+
                 <div className='container-content'>
                     {isSignin ?
                         <>
                             <label>Username*</label>
                             <div className='input-group'>
                                 <img src={imgurl + "user.png"} />
-                                <input type='text' ref={finput} className={errorData.username ? 'error' : ''} placeholder='Enter email id' autoComplete='off' name="username" value={signinData.username} onChange={(e) => handleSigninInput(e)} />
+                                <input
+                                    type='text'
+                                    ref={finput}
+                                    className={errorData.username ? 'error' : ''}
+                                    placeholder='Enter email id'
+                                    name="username"
+                                    value={signinData.username}
+                                    onChange={handleSigninInput}
+                                />
                             </div>
+
                             <label>Password*</label>
                             <div className='input-group'>
                                 <img src={imgurl + "padlock.png"} />
-                                <input type='password' className={errorData.password ? 'error' : ''} placeholder='Enter password' name='password' value={signinData.password} onChange={(e) => handleSigninInput(e)} />
+                                <input
+                                    type='password'
+                                    className={errorData.password ? 'error' : ''}
+                                    placeholder='Enter password'
+                                    name='password'
+                                    value={signinData.password}
+                                    onChange={handleSigninInput}
+                                />
                             </div>
+
                             <p>Forgot <span>Password?</span></p>
-                            <button onClick={() => signin()}>Let's Begin</button>
-                            <label onClick={() => switchWindow()}>Don't have an account? <span>Sign up</span></label>
+                            <button onClick={signin}>Let's Begin</button>
+                            <label onClick={switchWindow}>
+                                Don't have an account? <span>Sign up</span>
+                            </label>
                         </>
                         :
                         <>
                             <label>Full Name*</label>
                             <div className='input-group'>
                                 <img src={imgurl + "user.png"} />
-                                <input type='text' ref={finput} className={errorData.fullname ? 'error' : ''} placeholder='Enter full name' autoComplete='off' name='fullname' value={signupData.fullname} onChange={(e) => handleSignupInput(e)} />
+                                <input
+                                    type='text'
+                                    ref={finput}
+                                    className={errorData.fullname ? 'error' : ''}
+                                    placeholder='Enter full name'
+                                    name='fullname'
+                                    value={signupData.fullname}
+                                    onChange={handleSignupInput}
+                                />
                             </div>
+
                             <label>Mobile Number*</label>
                             <div className='input-group'>
                                 <img src={imgurl + "phone.png"} />
-                                <input type='text' className={errorData.phone ? 'error' : ''} placeholder='Enter mobile number' autoComplete='off' name='phone' value={signupData.phone} onChange={(e) => handleSignupInput(e)} />
+                                <input
+                                    type='text'
+                                    className={errorData.phone ? 'error' : ''}
+                                    placeholder='Enter mobile number'
+                                    name='phone'
+                                    value={signupData.phone}
+                                    onChange={handleSignupInput}
+                                />
                             </div>
+
                             <label>Email Address*</label>
                             <div className='input-group'>
                                 <img src={imgurl + "email.png"} />
-                                <input type='text' className={errorData.email ? 'error' : ''} placeholder='Enter email id' autoComplete='off' name='email' value={signupData.email} onChange={(e) => handleSignupInput(e)} />
+                                <input
+                                    type='text'
+                                    className={errorData.email ? 'error' : ''}
+                                    placeholder='Enter email id'
+                                    name='email'
+                                    value={signupData.email}
+                                    onChange={handleSignupInput}
+                                />
                             </div>
+
                             <label>Password*</label>
                             <div className='input-group'>
                                 <img src={imgurl + "padlock.png"} />
-                                <input type='password' className={errorData.password ? 'error' : ''} placeholder='Enter password' autoComplete='off' name='password' value={signupData.password} onChange={(e) => handleSignupInput(e)} />
+                                <input
+                                    type='password'
+                                    className={errorData.password ? 'error' : ''}
+                                    placeholder='Enter password'
+                                    name='password'
+                                    value={signupData.password}
+                                    onChange={handleSignupInput}
+                                />
                             </div>
+
                             <label>Re-type Password*</label>
                             <div className='input-group'>
                                 <img src={imgurl + "padlock.png"} />
-                                <input type='password' className={errorData.retypepassword ? 'error' : ''} placeholder='Re-type your password' autoComplete='off' name='retypepassword' value={signupData.retypepassword} onChange={(e) => handleSignupInput(e)} />
+                                <input
+                                    type='password'
+                                    className={errorData.retypepassword ? 'error' : ''}
+                                    placeholder='Re-type your password'
+                                    name='retypepassword'
+                                    value={signupData.retypepassword}
+                                    onChange={handleSignupInput}
+                                />
                             </div>
-                            <button onClick={() => signup()}>Register</button>
-                            <label onClick={() => switchWindow()}>Already have an account? <span>Sign in</span></label>
+
+                            {/* 🔥 ROLE DROPDOWN */}
+                            <label>Role*</label>
+                            <div className='input-group'>
+                                <select
+                                    name="role"
+                                    value={signupData.role}
+                                    onChange={handleSignupInput}
+                                >
+                                    <option value="1">User</option>
+                                    <option value="2">Manager</option>
+                                    <option value="3">Admin</option>
+                                </select>
+                            </div>
+
+                            <button onClick={signup}>Register</button>
+                            <label onClick={switchWindow}>
+                                Already have an account? <span>Sign in</span>
+                            </label>
                         </>
                     }
                 </div>
-                <div className='container-footer'>Copyright @ 2500032630 All rights reserved.</div>
+
+                <div className='container-footer'>
+                    Copyright @ 2500032630 All rights reserved.
+                </div>
             </div>
 
             <ProgressBar isProgress={isProgress} />
