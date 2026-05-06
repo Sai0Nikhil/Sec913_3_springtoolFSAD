@@ -1,0 +1,200 @@
+/* -------------------------------------------------------------
+   Roles Admin page — three sectioned cards on a soft surface
+-------------------------------------------------------------- */
+.roles-admin {
+    width: 100%;
+    height: 100%;
+    padding: 28px 32px;
+    box-sizing: border-box;
+    overflow: auto;
+    background: var(--background-secondary);
+}
+
+.roles-admin .ra-section {
+    background: var(--background);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 22px 26px;
+    margin-bottom: 18px;
+    transition: box-shadow var(--transition), transform var(--transition);
+}
+
+.roles-admin .ra-section:hover {
+    box-shadow: var(--shadow);
+}
+
+.roles-admin .ra-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+}
+
+.roles-admin .ra-title {
+    color: var(--text-dark);
+    font-weight: 600;
+    font-size: 15px;
+    min-width: 180px;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.roles-admin .ra-title::before {
+    content: "";
+    width: 4px;
+    height: 18px;
+    background: var(--primary-color);
+    border-radius: 2px;
+    display: inline-block;
+}
+
+/* Inputs */
+.roles-admin input[type="text"] {
+    flex: 1 1 320px;
+    max-width: 360px;
+    height: 38px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 0 14px;
+    background: var(--background);
+    color: var(--text-dark);
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.roles-admin input[type="text"]:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.roles-admin input[type="text"]::placeholder {
+    color: var(--text-muted);
+}
+
+/* Buttons */
+.roles-admin button {
+    height: 38px;
+    padding: 0 20px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: var(--primary-color);
+    color: #fff;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background var(--transition), box-shadow var(--transition), transform var(--transition);
+    box-shadow: var(--shadow-sm);
+    letter-spacing: 0.01em;
+}
+
+.roles-admin button:hover {
+    background: var(--primary-hover);
+    box-shadow: var(--shadow);
+}
+
+.roles-admin button:active {
+    transform: translateY(1px);
+}
+
+/* Map Menu with Roles */
+.roles-admin .ra-map {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 36px;
+    align-items: start;
+}
+
+.roles-admin .ra-map-left {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.roles-admin .ra-map-left select {
+    height: 42px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 0 14px;
+    background: var(--background);
+    color: var(--text-dark);
+    cursor: pointer;
+    transition: border-color var(--transition), box-shadow var(--transition);
+    font-size: 14px;
+    appearance: none;
+    background-image:
+        linear-gradient(45deg, transparent 50%, var(--text-gray) 50%),
+        linear-gradient(135deg, var(--text-gray) 50%, transparent 50%);
+    background-position:
+        calc(100% - 18px) 50%,
+        calc(100% - 12px) 50%;
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+    padding-right: 36px;
+}
+
+.roles-admin .ra-map-left select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.roles-admin .ra-map-right {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.roles-admin .ra-checkbox-area {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px 16px;
+    background: var(--background-secondary);
+    padding: 16px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+}
+
+.roles-admin .ra-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-dark);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: var(--radius-sm);
+    transition: background var(--transition);
+}
+
+.roles-admin .ra-check:hover {
+    background: var(--background-tertiary);
+}
+
+.roles-admin .ra-check input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary-color);
+    cursor: pointer;
+}
+
+.roles-admin .ra-empty {
+    color: var(--text-muted);
+    font-style: italic;
+    grid-column: 1 / -1;
+    padding: 8px 4px;
+}
+
+.roles-admin .ra-save {
+    align-self: flex-end;
+    min-width: 110px;
+}
+
+@media (max-width: 900px) {
+    .roles-admin .ra-map {
+        grid-template-columns: 1fr;
+    }
+    .roles-admin .ra-title {
+        min-width: 140px;
+    }
+}

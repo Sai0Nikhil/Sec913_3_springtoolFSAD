@@ -1,34 +1,107 @@
+/* -------------------------------------------------------------
+   Global design tokens — modern, sharp, neutral admin palette
+-------------------------------------------------------------- */
 :root {
-  --primary-color: #3498db;
-  --secondary-color: #2ecc71;
-  --text-dark: rgb(51, 51, 51);
-  --primary-blue: #01559C;
-  --primary-green: #438B2A;
-  --text-gray: #565656;
-  --accent-gray: #9AB2BB;
-  --background: #FEFEFE;
-  --border-gray: #ccc;
-  --error-background: #ffe6e6;
-  --border-color: #ddd;
-  --background-secondary: #f8f7f7;
+  /* Brand */
+  --primary-color: #2563eb;       /* sharp blue (buttons, accents) */
+  --primary-hover: #1d4ed8;
+  --primary-blue: #0f172a;        /* deep navy (sidebar, headings) */
+  --primary-blue-soft: #1e293b;
+  --primary-green: #16a34a;
+  --secondary-color: #6366f1;     /* indigo accent */
+
+  /* Surfaces */
+  --background: #ffffff;
+  --background-secondary: #f8fafc;
+  --background-tertiary: #f1f5f9;
+
+  /* Text */
+  --text-dark: #0f172a;
+  --text-gray: #475569;
+  --text-muted: #94a3b8;
+
+  /* Borders & dividers */
+  --border-color: #e2e8f0;
+  --border-gray: #cbd5e1;
+  --border-strong: #94a3b8;
+
+  /* Feedback */
+  --error: #ef4444;
+  --error-background: #fef2f2;
+  --warning: #f59e0b;
+  --success: #10b981;
+
+  /* Effects */
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.12);
+  --transition: 0.18s ease;
 }
-html, body, #root{ 
-  margin:0;
+
+html, body, #root {
+  margin: 0;
   width: 100%;
   height: 100%;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-size: 10pt;
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont,
+               'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-dark);
+  background: var(--background-secondary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
-:focus{
-  outline: 1px solid var(--secondary-color);
+
+* {
+  box-sizing: border-box;
 }
-.progress{
-  position: absolute;
+
+button {
+  font-family: inherit;
+}
+
+input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+:focus {
+  outline: none;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-gray);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
+}
+
+.progress {
+  position: fixed;
   width: 100%;
   height: 100%;
   left: 0;
   top: 0;
   z-index: 999;
-  background: url("/loading.gif") no-repeat center center rgba(0,0,0,0.1);
-  background-size: 50px 50px;
+  background: url("/loading.gif") no-repeat center center rgba(15, 23, 42, 0.35);
+  background-size: 56px 56px;
+  backdrop-filter: blur(2px);
 }

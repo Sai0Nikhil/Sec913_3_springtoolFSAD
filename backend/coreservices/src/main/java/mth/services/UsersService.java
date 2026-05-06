@@ -80,11 +80,12 @@ public class UsersService {
 			Map<String, Object> payload = JWT.validateJWT(token);
 	        String email = (String) payload.get("username");
 	        Users U = (Users) UR.findByEmail(email);
-	        
+
 	        List<Object> menuList = UR.getMenus(Long.valueOf(U.getRole()));
-			
+
 	        response.put("code", 200);
 	        response.put("fullname", U.getFullname());
+	        response.put("role", U.getRole());
 	        response.put("menulist", menuList);
 		}catch(Exception e)
 		{

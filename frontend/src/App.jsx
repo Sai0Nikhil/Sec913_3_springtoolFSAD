@@ -9,19 +9,21 @@ const App = () => {
     const [isProgress, setIsProgress] = useState(false);
     const [errorData, setErrorData] = useState({});
 
-    const [signupData, setSignupData] = useState({
+    const emptySignup = {
         fullname: "",
         phone: "",
         email: "",
         password: "",
-        retypepassword: "",
-        role: "1" // default User
-    });
+        retypepassword: ""
+    };
 
-    const [signinData, setSigninData] = useState({
+    const emptySignin = {
         username: "",
         password: ""
-    });
+    };
+
+    const [signupData, setSignupData] = useState(emptySignup);
+    const [signinData, setSigninData] = useState(emptySignin);
 
     useEffect(() => {
         setTimeout(() => { finput.current?.focus(); }, 0);
@@ -30,19 +32,8 @@ const App = () => {
     function switchWindow() {
         setIsSignIn(prev => !prev);
         setErrorData({});
-        setSigninData({
-            username: "",
-            password: ""
-        });
-
-        setSignupData({
-            fullname: "",
-            phone: "",
-            email: "",
-            password: "",
-            retypepassword: "",
-            role: "1"
-        });
+        setSigninData(emptySignin);
+        setSignupData(emptySignup);
     }
 
     function handleSigninInput(e) {
@@ -55,11 +46,15 @@ const App = () => {
         setSignupData({ ...signupData, [name]: value });
     }
 
+    function isValidEmail(v) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    }
+
     function validateSignup() {
         let errors = {};
-        if (signupData.fullname === "") errors.fullname = true;
-        if (signupData.phone === "") errors.phone = true;
-        if (signupData.email === "") errors.email = true;
+        if (signupData.fullname.trim() === "") errors.fullname = true;
+        if (!/^\d{6,15}$/.test(signupData.phone.trim())) errors.phone = true;
+        if (!isValidEmail(signupData.email.trim())) errors.email = true;
         if (signupData.password === "") errors.password = true;
         if (signupData.retypepassword === "" || signupData.password !== signupData.retypepassword) errors.retypepassword = true;
         setErrorData(errors);
@@ -68,7 +63,7 @@ const App = () => {
 
     function validateSignin() {
         let errors = {};
-        if (signinData.username === "") errors.username = true;
+        if (signinData.username.trim() === "") errors.username = true;
         if (signinData.password === "") errors.password = true;
         setErrorData(errors);
         return Object.keys(errors).length > 0;
@@ -76,40 +71,40 @@ const App = () => {
 
     function signin() {
         if (validateSignin()) return;
-
         setIsProgress(true);
         callApi("POST", apibaseurl + "/authservice/signin", signinData, null, signinResponseHandler);
     }
 
     function signup() {
         if (validateSignup()) return;
-
         setIsProgress(true);
+        // Note: backend always assigns role=1 (User). Admin promotes users from the Roles page.
         callApi("POST", apibaseurl + "/authservice/signup", signupData, null, signupResponseHandler);
     }
 
     function signinResponseHandler(res) {
-        if (res.code != 200)
-            alert(res.message);
-        else {
+        setIsProgress(false);
+        if (res && res.code === 200) {
             localStorage.setItem("token", res.jwt);
             window.location.replace("/home");
+        } else {
+            alert((res && res.message) || "Sign in failed");
         }
-        setIsProgress(false);
     }
 
     function signupResponseHandler(res) {
-        alert(res.message);
         setIsProgress(false);
-        setSignupData({
-            fullname: "",
-            phone: "",
-            email: "",
-            password: "",
-            retypepassword: "",
-            role: "1"
-        });
-        finput.current?.focus();
+        alert((res && res.message) || "Sign up failed");
+        if (res && res.code === 200) {
+            // Account created — bring the user back to the sign-in screen with their email pre-filled.
+            const email = signupData.email;
+            setSignupData(emptySignup);
+            setSigninData({ username: email, password: "" });
+            setErrorData({});
+            setIsSignIn(true);
+        } else {
+            finput.current?.focus();
+        }
     }
 
     return (
@@ -224,20 +219,6 @@ const App = () => {
                                 />
                             </div>
 
-                            {/* 🔥 ROLE DROPDOWN */}
-                            <label>Role*</label>
-                            <div className='input-group'>
-                                <select
-                                    name="role"
-                                    value={signupData.role}
-                                    onChange={handleSignupInput}
-                                >
-                                    <option value="1">User</option>
-                                    <option value="2">Manager</option>
-                                    <option value="3">Admin</option>
-                                </select>
-                            </div>
-
                             <button onClick={signup}>Register</button>
                             <label onClick={switchWindow}>
                                 Already have an account? <span>Sign in</span>
@@ -247,7 +228,7 @@ const App = () => {
                 </div>
 
                 <div className='container-footer'>
-                    Copyright @ 2500032630 All rights reserved.
+                    @2500032630 Sec_913
                 </div>
             </div>
 
