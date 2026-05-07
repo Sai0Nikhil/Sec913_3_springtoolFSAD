@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { imgurl, callApi, apibaseurl } from './lib';
 import './App.css';
 import ProgressBar from './components/ProgressBar.jsx';
+import FloatingBadge from './components/FloatingBadge.jsx';
 
 const App = () => {
     const [isSignin, setIsSignIn] = useState(true);
@@ -233,6 +234,7 @@ const App = () => {
             </div>
 
             <ProgressBar isProgress={isProgress} />
+            <FloatingBadge />
         </div>
     );
 }

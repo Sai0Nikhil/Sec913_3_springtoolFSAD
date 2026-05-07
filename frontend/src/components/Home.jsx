@@ -3,6 +3,7 @@ import './Home.css';
 import { apibaseurl, callApi, imgurl } from '../lib';
 import ProgressBar from './ProgressBar';
 import RolesAdmin from './RolesAdmin';
+import FloatingBadge from './FloatingBadge';
 
 // Decode the role claim out of a JWT without verifying the signature.
 // The backend signs JWTs with HS256 and stores `role` directly in the payload.
@@ -116,6 +117,7 @@ const Home = () => {
             <div className='home-footer'>@2500032630 Sec_913</div>
 
             <ProgressBar isProgress={isProgress} />
+            <FloatingBadge />
         </div>
     );
 }
