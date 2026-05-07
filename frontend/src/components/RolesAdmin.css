@@ -190,6 +190,111 @@
     min-width: 110px;
 }
 
+/* ===== Show Mappings toggle + list ===== */
+.roles-admin .ra-show-mappings {
+    width: 100%;
+    height: 38px;
+    padding: 0 14px;
+    background: var(--background-tertiary);
+    color: var(--text-dark);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    box-shadow: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    transition: background var(--transition), border-color var(--transition);
+    letter-spacing: 0.01em;
+}
+
+.roles-admin .ra-show-mappings:hover {
+    background: #e2e8f0;
+    border-color: var(--border-strong);
+}
+
+.roles-admin .ra-show-mappings.open {
+    border-color: var(--primary-color);
+    background: #eff6ff;
+    color: var(--primary-color);
+}
+
+.roles-admin .ra-caret {
+    font-size: 14px;
+    line-height: 1;
+}
+
+.roles-admin .ra-mappings-list {
+    margin-top: 4px;
+    max-height: 260px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--background);
+    box-shadow: var(--shadow-sm);
+    animation: raExpand 0.18s ease-out;
+}
+
+@keyframes raExpand {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.roles-admin .ra-mapping-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--text-dark);
+    border-bottom: 1px solid var(--border-color);
+    transition: background var(--transition);
+}
+
+.roles-admin .ra-mapping-row:last-child {
+    border-bottom: none;
+}
+
+.roles-admin .ra-mapping-row:hover {
+    background: var(--background-secondary);
+}
+
+.roles-admin .ra-mapping-row.orphan {
+    background: #fff7ed; /* soft amber */
+}
+
+.roles-admin .ra-mapping-row.orphan .ra-mapping-role,
+.roles-admin .ra-mapping-row.orphan .ra-mapping-menu {
+    color: #c2410c; /* warm warn-red */
+    font-style: italic;
+}
+
+.roles-admin .ra-mapping-role {
+    font-weight: 600;
+    color: var(--primary-color);
+    min-width: 90px;
+}
+
+.roles-admin .ra-mapping-arrow {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.roles-admin .ra-mapping-menu {
+    color: var(--text-gray);
+}
+
+.roles-admin .ra-mappings-empty {
+    padding: 14px;
+    text-align: center;
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 13px;
+}
+
 @media (max-width: 900px) {
     .roles-admin .ra-map {
         grid-template-columns: 1fr;

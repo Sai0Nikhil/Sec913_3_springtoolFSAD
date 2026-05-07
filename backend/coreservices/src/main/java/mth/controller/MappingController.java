@@ -1,5 +1,6 @@
 package mth.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,5 +42,26 @@ public class MappingController {
             response.put("message", e.getMessage());
         }
         return response;
+    }
+
+    /**
+     * Returns every role↔menu mapping with names attached so the UI can list them
+     * line by line without doing client-side joins.
+     * Path is `/list-all` (not `/all`) to avoid colliding with `/{role}`.
+     * Response shape: [ { roleId, roleName, mid, menu }, ... ]
+     */
+    @GetMapping("/list-all")
+    public List<Map<String, Object>> listAllMappings() {
+        List<Object[]> rows = repo.findAllMappingsWithNames();
+        List<Map<String, Object>> out = new ArrayList<>(rows.size());
+        for (Object[] r : rows) {
+            Map<String, Object> entry = new HashMap<>();
+            entry.put("roleId",   r[0]);
+            entry.put("roleName", r[1]);
+            entry.put("mid",      r[2]);
+            entry.put("menu",     r[3]);
+            out.add(entry);
+        }
+        return out;
     }
 }

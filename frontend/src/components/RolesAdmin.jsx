@@ -12,6 +12,11 @@ const RolesAdmin = ({ token }) => {
     const [selectedRole, setSelectedRole] = useState("");
     const [selectedMenuIds, setSelectedMenuIds] = useState([]);
 
+    // "Show Mappings" panel
+    const [showMappings, setShowMappings] = useState(false);
+    const [allMappings, setAllMappings] = useState([]);
+    const [loadingMappings, setLoadingMappings] = useState(false);
+
     useEffect(() => {
         loadRoles();
         loadMenus();
@@ -85,6 +90,25 @@ const RolesAdmin = ({ token }) => {
         );
     }
 
+    function loadAllMappings() {
+        setLoadingMappings(true);
+        callApi("GET", apibaseurl + "/mapping/list-all", null, null, (res) => {
+            setLoadingMappings(false);
+            if (Array.isArray(res)) {
+                setAllMappings(res);
+            } else {
+                console.warn("Unexpected /mapping/list-all response:", res);
+                setAllMappings([]);
+            }
+        }, token);
+    }
+
+    function toggleShowMappings() {
+        const next = !showMappings;
+        setShowMappings(next);
+        if (next) loadAllMappings();
+    }
+
     function saveMapping() {
         if (!selectedRole) {
             alert("Please select a role");
@@ -154,6 +178,46 @@ const RolesAdmin = ({ token }) => {
                                 <option key={r.role} value={r.role}>{r.rolename}</option>
                             ))}
                         </select>
+
+                        {/* Show Mappings toggle + collapsible scrollable list */}
+                        <button
+                            type="button"
+                            className={"ra-show-mappings " + (showMappings ? "open" : "")}
+                            onClick={toggleShowMappings}
+                        >
+                            <span>Show Mappings</span>
+                            <span className="ra-caret">{showMappings ? "▴" : "▾"}</span>
+                        </button>
+
+                        {showMappings && (
+                            <div className="ra-mappings-list">
+                                {loadingMappings && (
+                                    <div className="ra-mappings-empty">Loading…</div>
+                                )}
+                                {!loadingMappings && allMappings.length === 0 && (
+                                    <div className="ra-mappings-empty">No mappings yet.</div>
+                                )}
+                                {!loadingMappings && allMappings.map((m, i) => {
+                                    const roleLabel = m.roleName
+                                        ? m.roleName
+                                        : `(missing role #${m.roleId})`;
+                                    const menuLabel = m.menu
+                                        ? m.menu
+                                        : `(missing menu #${m.mid})`;
+                                    const isOrphan = !m.roleName || !m.menu;
+                                    return (
+                                        <div
+                                            className={"ra-mapping-row " + (isOrphan ? "orphan" : "")}
+                                            key={`${m.roleId}-${m.mid}-${i}`}
+                                        >
+                                            <span className="ra-mapping-role">{roleLabel}</span>
+                                            <span className="ra-mapping-arrow">→</span>
+                                            <span className="ra-mapping-menu">{menuLabel}</span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
                     <div className="ra-map-right">
                         <div className="ra-checkbox-area">
