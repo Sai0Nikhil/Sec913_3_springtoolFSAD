@@ -37,13 +37,10 @@ public class RolesController {
 				response.put("message", "Role name is required");
 				return response;
 			}
-
-			// Auto-assign next role id (PK is not auto-generated on the entity)
 			if (role.getRole() == null) {
 				Long nextId = repo.getMaxRoleId() + 1;
 				role.setRole(nextId);
 			}
-
 			repo.save(role);
 			response.put("code", 200);
 			response.put("message", "Role added successfully");

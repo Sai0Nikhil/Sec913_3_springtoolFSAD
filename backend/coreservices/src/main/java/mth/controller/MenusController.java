@@ -37,18 +37,13 @@ public class MenusController {
 				response.put("message", "Menu name is required");
 				return response;
 			}
-
-			// Auto-assign next menu id (PK is not auto-generated on the entity)
 			if (menu.getMid() == null) {
 				Long nextId = repo.getMaxMenuId() + 1;
 				menu.setMid(nextId);
 			}
-
-			// default icon if none provided
 			if (menu.getIcon() == null || menu.getIcon().trim().isEmpty()) {
 				menu.setIcon("menu.png");
 			}
-
 			repo.save(menu);
 			response.put("code", 200);
 			response.put("message", "Menu added successfully");

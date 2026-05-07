@@ -45,10 +45,7 @@ public class MappingController {
     }
 
     /**
-     * Returns every role↔menu mapping with names attached so the UI can list them
-     * line by line without doing client-side joins.
-     * Path is `/list-all` (not `/all`) to avoid colliding with `/{role}`.
-     * Response shape: [ { roleId, roleName, mid, menu }, ... ]
+     * Returns every role↔menu mapping with names attached.
      */
     @GetMapping("/list-all")
     public List<Map<String, Object>> listAllMappings() {

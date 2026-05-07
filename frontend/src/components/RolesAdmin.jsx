@@ -119,9 +119,6 @@ const RolesAdmin = ({ token }) => {
             mid: Number(mid)
         }));
 
-        // If empty, still POST so the backend clears the existing mapping for that role.
-        // Backend currently only clears when list non-empty; send a sentinel role-only entry
-        // by including a dummy mapping is not ideal, so just skip if empty and warn.
         if (payload.length === 0) {
             if (!confirm("No menus selected. This will not change current mapping. Continue?")) return;
         }
@@ -129,8 +126,9 @@ const RolesAdmin = ({ token }) => {
         callApi("POST", apibaseurl + "/mapping", payload, null, (res) => {
             if (res && res.code === 200) {
                 alert("Mappings saved successfully");
+                if (showMappings) loadAllMappings();
             } else if (typeof res === "string") {
-                alert(res); // backwards compatible if backend ever returns string
+                alert(res);
             } else {
                 alert((res && res.message) || "Failed to save mapping");
             }
@@ -179,7 +177,6 @@ const RolesAdmin = ({ token }) => {
                             ))}
                         </select>
 
-                        {/* Show Mappings toggle + collapsible scrollable list */}
                         <button
                             type="button"
                             className={"ra-show-mappings " + (showMappings ? "open" : "")}
@@ -191,19 +188,13 @@ const RolesAdmin = ({ token }) => {
 
                         {showMappings && (
                             <div className="ra-mappings-list">
-                                {loadingMappings && (
-                                    <div className="ra-mappings-empty">Loading…</div>
-                                )}
+                                {loadingMappings && <div className="ra-mappings-empty">Loading…</div>}
                                 {!loadingMappings && allMappings.length === 0 && (
                                     <div className="ra-mappings-empty">No mappings yet.</div>
                                 )}
                                 {!loadingMappings && allMappings.map((m, i) => {
-                                    const roleLabel = m.roleName
-                                        ? m.roleName
-                                        : `(missing role #${m.roleId})`;
-                                    const menuLabel = m.menu
-                                        ? m.menu
-                                        : `(missing menu #${m.mid})`;
+                                    const roleLabel = m.roleName ? m.roleName : `(missing role #${m.roleId})`;
+                                    const menuLabel = m.menu ? m.menu : `(missing menu #${m.mid})`;
                                     const isOrphan = !m.roleName || !m.menu;
                                     return (
                                         <div
