@@ -47,4 +47,14 @@ public class UsersController {
 	{
 		return "Welcome I'm fine";
 	}
+
+	/**
+	 * Admin-only: list every user with their role name attached.
+	 * Returns: { code, users: [ { id, fullname, email, phone, role, rolename, status }, ... ] }
+	 */
+	@GetMapping("/list")
+	public Object listUsers(@RequestHeader("Token") String token)
+	{
+		return US.listAllUsers(token);
+	}
 }

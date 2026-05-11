@@ -23,4 +23,17 @@ public interface UsersRepository extends JpaRepository<Users, Long> {
 	
 	@Query("select M from Menus M join Rolesmapping R on M.mid=R.mid where R.role=:role")
 	public List<Object> getMenus(@Param("role") Long role);
+
+	/**
+	 * Admin view: list every user with their role name attached.
+	 * Native query because Users.role is int and Roles.role is bigint —
+	 * JPQL ad-hoc joins between mismatched types are flaky across versions.
+	 * Returns Object[]: { id, fullname, email, phone, role, rolename, status }
+	 */
+	@Query(value =
+		"SELECT u.id, u.fullname, u.email, u.phone, u.role, r.rolename, u.status " +
+		"FROM users u LEFT JOIN roles r ON r.role = u.role " +
+		"ORDER BY u.id ASC",
+		nativeQuery = true)
+	public List<Object[]> listAllWithRole();
 }

@@ -15,7 +15,8 @@ const App = () => {
         phone: "",
         email: "",
         password: "",
-        retypepassword: ""
+        retypepassword: "",
+        role: 1            // default to User (role id 1)
     };
 
     const emptySignin = {
@@ -26,8 +27,31 @@ const App = () => {
     const [signupData, setSignupData] = useState(emptySignup);
     const [signinData, setSigninData] = useState(emptySignin);
 
+    // Roles available for self-signup. Loaded once from /roles, with Admin filtered out.
+    const [signupRoles, setSignupRoles] = useState([]);
+
     useEffect(() => {
         setTimeout(() => { finput.current?.focus(); }, 0);
+    }, [isSignin]);
+
+    useEffect(() => {
+        // Pull the list of roles when the signup form is shown for the first time.
+        if (!isSignin && signupRoles.length === 0) {
+            callApi("GET", apibaseurl + "/roles", null, null, (res) => {
+                if (Array.isArray(res)) {
+                    const filtered = res.filter(r =>
+                        // Filter by name AND by id, in case admin has been renamed or moved.
+                        (r.rolename || "").toLowerCase() !== "admin" && Number(r.role) !== 3
+                    );
+                    setSignupRoles(filtered);
+                    // If we have at least one allowed role, default to the first one.
+                    if (filtered.length > 0 && !filtered.some(r => Number(r.role) === Number(signupData.role))) {
+                        setSignupData(prev => ({ ...prev, role: Number(filtered[0].role) }));
+                    }
+                }
+            });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isSignin]);
 
     function switchWindow() {
@@ -44,7 +68,9 @@ const App = () => {
 
     function handleSignupInput(e) {
         const { name, value } = e.target;
-        setSignupData({ ...signupData, [name]: value });
+        // role comes from a <select> as a string; coerce to number
+        const v = name === "role" ? Number(value) : value;
+        setSignupData({ ...signupData, [name]: v });
     }
 
     function isValidEmail(v) {
@@ -58,6 +84,7 @@ const App = () => {
         if (!isValidEmail(signupData.email.trim())) errors.email = true;
         if (signupData.password === "") errors.password = true;
         if (signupData.retypepassword === "" || signupData.password !== signupData.retypepassword) errors.retypepassword = true;
+        if (Number(signupData.role) === 3) errors.role = true; // Admin not allowed
         setErrorData(errors);
         return Object.keys(errors).length > 0;
     }
@@ -79,7 +106,6 @@ const App = () => {
     function signup() {
         if (validateSignup()) return;
         setIsProgress(true);
-        // Note: backend always assigns role=1 (User). Admin promotes users from the Roles page.
         callApi("POST", apibaseurl + "/authservice/signup", signupData, null, signupResponseHandler);
     }
 
@@ -97,7 +123,6 @@ const App = () => {
         setIsProgress(false);
         alert((res && res.message) || "Sign up failed");
         if (res && res.code === 200) {
-            // Account created — bring the user back to the sign-in screen with their email pre-filled.
             const email = signupData.email;
             setSignupData(emptySignup);
             setSigninData({ username: email, password: "" });
@@ -218,6 +243,22 @@ const App = () => {
                                     value={signupData.retypepassword}
                                     onChange={handleSignupInput}
                                 />
+                            </div>
+
+                            <label>Role*</label>
+                            <div className={'input-group' + (errorData.role ? ' has-error' : '')}>
+                                <select
+                                    name="role"
+                                    value={signupData.role}
+                                    onChange={handleSignupInput}
+                                >
+                                    {signupRoles.length === 0 && (
+                                        <option value={1}>User</option>
+                                    )}
+                                    {signupRoles.map(r => (
+                                        <option key={r.role} value={Number(r.role)}>{r.rolename}</option>
+                                    ))}
+                                </select>
                             </div>
 
                             <button onClick={signup}>Register</button>

@@ -4,6 +4,9 @@ import { apibaseurl, callApi, imgurl } from '../lib';
 import ProgressBar from './ProgressBar';
 import RolesAdmin from './RolesAdmin';
 import FloatingBadge from './FloatingBadge';
+import TaskManager from './TaskManager';
+import MyTask from './MyTask';
+import UserManager from './UserManager';
 
 // Decode the role claim out of a JWT without verifying the signature.
 // The backend signs JWTs with HS256 and stores `role` directly in the payload.
@@ -83,6 +86,15 @@ const Home = () => {
         const name = (activeMenu.menu || "").toLowerCase();
         if (name === "roles" || name === "role manager") {
             return <RolesAdmin token={token} />;
+        }
+        if (name === "task manager") {
+            return <TaskManager token={token} />;
+        }
+        if (name === "my task" || name === "mytask" || name === "my tasks") {
+            return <MyTask token={token} />;
+        }
+        if (name === "user manager" || name === "users") {
+            return <UserManager token={token} />;
         }
         return <div className='home-content-default'>{activeMenu.menu}</div>;
     }
