@@ -40,6 +40,20 @@ public class UsersController {
 	{
 		return US.uinfo(token);
 	}
+
+	@org.springframework.web.bind.annotation.PatchMapping("/me")
+	public Object updateMe(@RequestHeader("Token") String token,
+	                       @RequestBody Map<String, Object> body)
+	{
+		return US.updateMe(token, body);
+	}
+
+	@PostMapping("/password")
+	public Object changePassword(@RequestHeader("Token") String token,
+	                             @RequestBody Map<String, Object> body)
+	{
+		return US.changePassword(token, body);
+	}
 	
 	
 	@GetMapping("/test")

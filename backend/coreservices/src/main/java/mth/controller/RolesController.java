@@ -32,11 +32,26 @@ public class RolesController {
 	public Object addRole(@RequestBody Roles role) {
 		Map<String, Object> response = new HashMap<>();
 		try {
-			if (role.getRolename() == null || role.getRolename().trim().isEmpty()) {
+			String name = role.getRolename() == null ? "" : role.getRolename().trim();
+			if (name.isEmpty() || name.length() > 50) {
 				response.put("code", 400);
-				response.put("message", "Role name is required");
+				response.put("message", "Role name is required (max 50 chars).");
 				return response;
 			}
+			// Reject pure-numeric or duplicate (case-insensitive) names
+			if (name.matches("^\\d+$")) {
+				response.put("code", 400);
+				response.put("message", "Role name can't be only digits.");
+				return response;
+			}
+			boolean duplicate = repo.findAll().stream()
+				.anyMatch(r -> r.getRolename() != null && r.getRolename().equalsIgnoreCase(name));
+			if (duplicate) {
+				response.put("code", 409);
+				response.put("message", "A role with that name already exists.");
+				return response;
+			}
+			role.setRolename(name);
 			if (role.getRole() == null) {
 				Long nextId = repo.getMaxRoleId() + 1;
 				role.setRole(nextId);

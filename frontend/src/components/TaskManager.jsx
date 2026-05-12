@@ -3,6 +3,7 @@ import { apibaseurl, callApi } from '../lib';
 import './AdminPages.css';
 import './TaskManager.css';
 import PageHeader from './PageHeader';
+import { downloadCsv, downloadPdfTable, fmtDateTime } from '../exports.js';
 
 const TaskManager = ({ token }) => {
     const [roles, setRoles] = useState([]);
@@ -20,6 +21,7 @@ const TaskManager = ({ token }) => {
         minutes: ""
     };
     const [form, setForm] = useState(empty);
+    const [filter, setFilter] = useState("all");
 
     useEffect(() => {
         loadRoles();
@@ -114,6 +116,33 @@ const TaskManager = ({ token }) => {
         catch { return d; }
     }
 
+    function exportTasksPdf(rows, currentFilter) {
+        const list = currentFilter === "all" ? rows : rows.filter(t => t.status === currentFilter);
+        downloadPdfTable({
+            title: "Task Manager — All Tasks",
+            subtitle:
+                "Filter: " + (currentFilter === "all" ? "All" : currentFilter)
+                + "  •  " + list.length + " row(s)",
+            columns: [
+                { header: "ID",       dataKey: "id" },
+                { header: "Title",    dataKey: "title" },
+                { header: "Status",   dataKey: "status" },
+                { header: "Assignee", dataKey: "assigneeName" },
+                { header: "Type",     dataKey: "assigneeType" },
+                { header: "Hours",    dataKey: "hours" },
+                { header: "Minutes",  dataKey: "minutes" },
+                { header: "Due",      dataKey: "_due" },
+                { header: "Created",  dataKey: "_created" }
+            ],
+            rows: list.map(t => ({
+                ...t,
+                _due:     fmtDateTime(t.workDate || t.dueDate),
+                _created: fmtDateTime(t.createdAt)
+            })),
+            filename: "tasks-" + (currentFilter === "all" ? "all" : currentFilter.toLowerCase())
+        });
+    }
+
     return (
         <>
             <PageHeader
@@ -200,12 +229,52 @@ const TaskManager = ({ token }) => {
                 </div>
 
                 <div className="ap-section">
-                    <h3 className="ap-title">All Tasks</h3>
+                    <div className="ap-section-head">
+                        <h3 className="ap-title">All Tasks</h3>
+                        <div className="ap-export-actions">
+                            <button className="ap-export-btn ap-export-csv"
+                                onClick={() => downloadCsv("/reports/tasks/all.csv", "tasks-all.csv", token)}
+                                title="Download CSV (opens in Excel)"
+                            >⤓ CSV</button>
+                            <button className="ap-export-btn ap-export-pdf"
+                                onClick={() => exportTasksPdf(tasks, filter)}
+                                title="Download PDF report"
+                            >⤓ PDF</button>
+                        </div>
+                    </div>
+
+                    {(() => {
+                        const counts = {
+                            all:        tasks.length,
+                            Pending:    tasks.filter(t => t.status === "Pending").length,
+                            InProgress: tasks.filter(t => t.status === "InProgress").length,
+                            Completed:  tasks.filter(t => t.status === "Completed").length
+                        };
+                        return (
+                            <div className="ap-tabs">
+                                {["all", "Pending", "InProgress", "Completed"].map(k => (
+                                    <button
+                                        key={k}
+                                        className={"ap-tab " + (filter === k ? "is-active" : "")}
+                                        onClick={() => setFilter(k)}
+                                    >
+                                        {k === "all" ? "All" : (k === "InProgress" ? "In Progress" : k)}
+                                        <span className="ap-tab-count">{counts[k]}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        );
+                    })()}
+
                     {loading && <div className="ap-empty">Loading…</div>}
-                    {!loading && tasks.length === 0 && (
-                        <div className="ap-empty">No tasks yet — create one above.</div>
-                    )}
-                    {!loading && tasks.length > 0 && (
+                    {(() => {
+                        const filtered = filter === "all" ? tasks : tasks.filter(t => t.status === filter);
+                        if (!loading && filtered.length === 0) {
+                            return <div className="ap-empty">{filter === "all" ? "No tasks yet — create one above." : "Nothing matches this filter."}</div>;
+                        }
+                        return null;
+                    })()}
+                    {!loading && (filter === "all" ? tasks : tasks.filter(t => t.status === filter)).length > 0 && (
                         <table className="ap-table">
                             <thead>
                                 <tr>
@@ -219,7 +288,7 @@ const TaskManager = ({ token }) => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {tasks.map(t => (
+                                {(filter === "all" ? tasks : tasks.filter(t => t.status === filter)).map(t => (
                                     <tr key={t.id}>
                                         <td>
                                             <div style={{ fontWeight: 600 }}>{t.title}</div>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { apibaseurl, callApi } from '../lib';
 import './RolesAdmin.css';
 import PageHeader from './PageHeader';
+import { downloadCsv, downloadPdfTable } from '../exports.js';
 
 const RolesAdmin = ({ token }) => {
     const [roles, setRoles] = useState([]);
@@ -114,6 +115,28 @@ const RolesAdmin = ({ token }) => {
         const next = !showMappings;
         setShowMappings(next);
         if (next) loadAllMappings();
+    }
+
+    function exportMappingsPdf() {
+        const filtered = deleteFilter === ""
+            ? deleteList
+            : deleteList.filter(m => Number(m.roleId) === Number(deleteFilter));
+        downloadPdfTable({
+            title: "Role ↔ Menu Mappings",
+            subtitle: (deleteFilter ? "Filtered to one role  •  " : "") + filtered.length + " mapping(s)",
+            columns: [
+                { header: "Role ID",   dataKey: "roleId" },
+                { header: "Role",      dataKey: "roleName" },
+                { header: "Menu ID",   dataKey: "mid" },
+                { header: "Menu",      dataKey: "menu" }
+            ],
+            rows: filtered.map(m => ({
+                ...m,
+                roleName: m.roleName || "(missing)",
+                menu:     m.menu     || "(missing)"
+            })),
+            filename: "role-mappings"
+        });
     }
 
     function loadDeleteList() {
@@ -266,7 +289,19 @@ const RolesAdmin = ({ token }) => {
 
             {/* --- Delete Mappings (scroll down for this) --- */}
             <div className="ra-section ra-delete-section">
-                <label className="ra-title">Delete Mappings</label>
+                <div className="ra-section-head">
+                    <label className="ra-title">Delete Mappings</label>
+                    <div className="ap-export-actions">
+                        <button className="ap-export-btn ap-export-csv"
+                            onClick={() => downloadCsv("/reports/mappings.csv", "role-mappings.csv", token)}
+                            title="Download CSV"
+                        >⤓ CSV</button>
+                        <button className="ap-export-btn ap-export-pdf"
+                            onClick={() => exportMappingsPdf()}
+                            title="Download PDF"
+                        >⤓ PDF</button>
+                    </div>
+                </div>
 
                 <div className="ra-delete-toolbar">
                     <div className="ra-delete-filter">

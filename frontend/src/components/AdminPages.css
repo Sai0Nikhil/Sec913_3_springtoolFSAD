@@ -257,6 +257,241 @@
     color: #166534;
 }
 
+/* ===== Filter tabs (used by My Task & Task Manager) ===== */
+.ap .ap-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 12px;
+}
+
+.ap .ap-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--background-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-gray);
+    height: 34px;
+    padding: 0 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition), border-color var(--transition);
+}
+
+.ap .ap-tab:hover {
+    background: var(--background-tertiary);
+    color: var(--text-dark);
+}
+
+.ap .ap-tab.is-active {
+    background: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+}
+
+.ap .ap-tab-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 18px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.07);
+    color: inherit;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.ap .ap-tab.is-active .ap-tab-count {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* ===== Toolbar (search + page-size) ===== */
+.ap .ap-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.ap .ap-search {
+    flex: 1 1 280px;
+    height: 38px;
+    padding: 0 14px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--background);
+    color: var(--text-dark);
+    font-size: 14px;
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.ap .ap-search:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    outline: none;
+}
+
+.ap .ap-page-size {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-gray);
+}
+
+.ap .ap-page-size select {
+    height: 34px;
+    padding: 0 28px 0 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--background);
+    color: var(--text-dark);
+    font-size: 13px;
+    appearance: none;
+    background-image:
+        linear-gradient(45deg, transparent 50%, var(--text-gray) 50%),
+        linear-gradient(135deg, var(--text-gray) 50%, transparent 50%);
+    background-position:
+        calc(100% - 14px) 50%,
+        calc(100% - 8px) 50%;
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+    cursor: pointer;
+}
+
+/* ===== Pagination ===== */
+.ap .ap-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-color);
+    flex-wrap: wrap;
+}
+
+.ap .ap-pagination-info {
+    font-size: 12px;
+    color: var(--text-gray);
+}
+
+.ap .ap-pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.ap .ap-page-btn {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    border: 1px solid var(--border-color);
+    background: var(--background);
+    color: var(--text-dark);
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition), border-color var(--transition);
+}
+
+.ap .ap-page-btn:hover {
+    background: var(--background-secondary);
+    border-color: var(--border-strong);
+}
+
+.ap .ap-page-btn.is-active {
+    background: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
+}
+
+.ap .ap-page-ellipsis {
+    padding: 0 4px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.ap button.ap-ghost:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ===== Section head with title + export actions on the right ===== */
+.ap .ap-section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    gap: 12px;
+}
+
+.ap .ap-section-head .ap-title { margin: 0; }
+
+.ap .ap-export-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ap .ap-export-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: var(--background);
+    color: var(--text-dark);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition), border-color var(--transition), transform var(--transition);
+    letter-spacing: 0.02em;
+}
+
+.ap .ap-export-btn:hover {
+    background: var(--background-tertiary);
+    border-color: var(--border-strong);
+    transform: translateY(-1px);
+}
+
+.ap .ap-export-btn.ap-export-csv {
+    border-color: #16a34a;
+    color: #166534;
+    background: #f0fdf4;
+}
+.ap .ap-export-btn.ap-export-csv:hover {
+    background: #16a34a;
+    color: #fff;
+    border-color: #15803d;
+}
+
+.ap .ap-export-btn.ap-export-pdf {
+    border-color: #dc2626;
+    color: #991b1b;
+    background: #fef2f2;
+}
+.ap .ap-export-btn.ap-export-pdf:hover {
+    background: #dc2626;
+    color: #fff;
+    border-color: #b91c1c;
+}
+
 @media (max-width: 900px) {
     .ap .ap-form { grid-template-columns: 1fr; }
+    .ap .ap-section-head { flex-direction: column; align-items: stretch; }
+    .ap .ap-export-actions { justify-content: flex-end; }
 }

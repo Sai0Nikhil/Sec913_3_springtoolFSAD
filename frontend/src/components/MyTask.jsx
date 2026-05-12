@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { apibaseurl, callApi } from '../lib';
 import './AdminPages.css';
 import PageHeader from './PageHeader';
+import { downloadCsv, downloadPdfTable, fmtDateTime } from '../exports.js';
 
 /**
  * Personal task view — shows tasks assigned to me by user id OR by my role.
@@ -10,6 +11,7 @@ import PageHeader from './PageHeader';
 const MyTask = ({ token }) => {
     const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [filter, setFilter] = useState("all");
 
     useEffect(() => { load(); }, []);
 
@@ -36,6 +38,37 @@ const MyTask = ({ token }) => {
         catch { return d; }
     }
 
+    function exportMyPdf() {
+        const list = filter === "all" ? tasks : tasks.filter(t => t.status === filter);
+        downloadPdfTable({
+            title: "My Tasks",
+            subtitle:
+                "Filter: " + (filter === "all" ? "All" : filter)
+                + "  •  " + list.length + " row(s)",
+            columns: [
+                { header: "Title",      dataKey: "title" },
+                { header: "Status",     dataKey: "status" },
+                { header: "Assigned",   dataKey: "assigneeName" },
+                { header: "Type",       dataKey: "assigneeType" },
+                { header: "From",       dataKey: "creatorName" },
+                { header: "Due / Work", dataKey: "_due" }
+            ],
+            rows: list.map(t => ({
+                ...t,
+                _due: fmtDateTime(t.workDate || t.dueDate)
+            })),
+            filename: "my-tasks-" + (filter === "all" ? "all" : filter.toLowerCase())
+        });
+    }
+
+    const counts = {
+        all:        tasks.length,
+        Pending:    tasks.filter(t => t.status === "Pending").length,
+        InProgress: tasks.filter(t => t.status === "InProgress").length,
+        Completed:  tasks.filter(t => t.status === "Completed").length
+    };
+    const filtered = filter === "all" ? tasks : tasks.filter(t => t.status === filter);
+
     return (
         <>
         <PageHeader
@@ -45,12 +78,38 @@ const MyTask = ({ token }) => {
         />
         <div className="ap">
             <div className="ap-section">
-                <h3 className="ap-title">My Tasks</h3>
+                <div className="ap-section-head">
+                    <h3 className="ap-title">My Tasks</h3>
+                    <div className="ap-export-actions">
+                        <button className="ap-export-btn ap-export-csv"
+                            onClick={() => downloadCsv("/reports/tasks/my.csv", "my-tasks.csv", token)}
+                            title="Download CSV"
+                        >⤓ CSV</button>
+                        <button className="ap-export-btn ap-export-pdf"
+                            onClick={() => exportMyPdf()}
+                            title="Download PDF"
+                        >⤓ PDF</button>
+                    </div>
+                </div>
+
+                <div className="ap-tabs">
+                    {["all", "Pending", "InProgress", "Completed"].map(k => (
+                        <button
+                            key={k}
+                            className={"ap-tab " + (filter === k ? "is-active" : "")}
+                            onClick={() => setFilter(k)}
+                        >
+                            {k === "all" ? "All" : (k === "InProgress" ? "In Progress" : k)}
+                            <span className="ap-tab-count">{counts[k]}</span>
+                        </button>
+                    ))}
+                </div>
+
                 {loading && <div className="ap-empty">Loading…</div>}
-                {!loading && tasks.length === 0 && (
-                    <div className="ap-empty">Nothing assigned to you right now.</div>
+                {!loading && filtered.length === 0 && (
+                    <div className="ap-empty">{filter === "all" ? "Nothing assigned to you right now." : "Nothing matches this filter."}</div>
                 )}
-                {!loading && tasks.length > 0 && (
+                {!loading && filtered.length > 0 && (
                     <table className="ap-table">
                         <thead>
                             <tr>
@@ -63,7 +122,7 @@ const MyTask = ({ token }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {tasks.map(t => (
+                            {filtered.map(t => (
                                 <tr key={t.id}>
                                     <td>
                                         <div style={{ fontWeight: 600 }}>{t.title}</div>

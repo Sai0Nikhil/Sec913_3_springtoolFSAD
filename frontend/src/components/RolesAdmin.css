@@ -309,7 +309,15 @@
 }
 
 .roles-admin .ra-delete-section .ra-title {
+    margin-bottom: 0;
+}
+
+.roles-admin .ra-section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     margin-bottom: 16px;
+    gap: 12px;
 }
 
 .roles-admin .ra-delete-toolbar {

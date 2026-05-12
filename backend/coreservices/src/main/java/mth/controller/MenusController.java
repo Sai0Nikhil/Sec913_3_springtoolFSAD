@@ -32,11 +32,25 @@ public class MenusController {
 	public Object addMenu(@RequestBody Menus menu) {
 		Map<String, Object> response = new HashMap<>();
 		try {
-			if (menu.getMenu() == null || menu.getMenu().trim().isEmpty()) {
+			String name = menu.getMenu() == null ? "" : menu.getMenu().trim();
+			if (name.length() < 2 || name.length() > 50) {
 				response.put("code", 400);
-				response.put("message", "Menu name is required");
+				response.put("message", "Menu name must be 2-50 characters.");
 				return response;
 			}
+			if (name.matches("^\\d+$")) {
+				response.put("code", 400);
+				response.put("message", "Menu name can't be only digits.");
+				return response;
+			}
+			boolean duplicate = repo.findAll().stream()
+				.anyMatch(m -> m.getMenu() != null && m.getMenu().equalsIgnoreCase(name));
+			if (duplicate) {
+				response.put("code", 409);
+				response.put("message", "A menu with that name already exists.");
+				return response;
+			}
+			menu.setMenu(name);
 			if (menu.getMid() == null) {
 				Long nextId = repo.getMaxMenuId() + 1;
 				menu.setMid(nextId);

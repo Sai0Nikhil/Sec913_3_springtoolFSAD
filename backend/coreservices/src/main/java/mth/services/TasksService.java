@@ -44,9 +44,15 @@ public class TasksService {
 			}
 
 			String title = body.get("title") == null ? "" : body.get("title").toString().trim();
-			if (title.isEmpty()) {
+			if (title.isEmpty() || title.length() > 200) {
 				response.put("code", 400);
-				response.put("message", "Title is required");
+				response.put("message", "Title is required (max 200 chars).");
+				return response;
+			}
+			String description = body.get("description") == null ? "" : body.get("description").toString();
+			if (description.length() > 2000) {
+				response.put("code", 400);
+				response.put("message", "Description is too long (max 2000 chars).");
 				return response;
 			}
 			String type = body.get("assigneeType") == null ? "" : body.get("assigneeType").toString().toUpperCase();
@@ -60,6 +66,35 @@ public class TasksService {
 				response.put("code", 400);
 				response.put("message", "assigneeId is required");
 				return response;
+			}
+
+			// Range-check hours / minutes if provided
+			Integer hoursVal = null, minutesVal = null;
+			if (body.get("hours") != null && !body.get("hours").toString().isEmpty()) {
+				try { hoursVal = Integer.parseInt(body.get("hours").toString()); }
+				catch (Exception e) {
+					response.put("code", 400);
+					response.put("message", "Hours must be a number.");
+					return response;
+				}
+				if (hoursVal < 0 || hoursVal > 999) {
+					response.put("code", 400);
+					response.put("message", "Hours must be between 0 and 999.");
+					return response;
+				}
+			}
+			if (body.get("minutes") != null && !body.get("minutes").toString().isEmpty()) {
+				try { minutesVal = Integer.parseInt(body.get("minutes").toString()); }
+				catch (Exception e) {
+					response.put("code", 400);
+					response.put("message", "Minutes must be a number.");
+					return response;
+				}
+				if (minutesVal < 0 || minutesVal > 59) {
+					response.put("code", 400);
+					response.put("message", "Minutes must be between 0 and 59.");
+					return response;
+				}
 			}
 
 			Users creator = (Users) usersRepo.findByEmail(email);
