@@ -38,6 +38,13 @@ public class TasksController {
 		return TS.updateStatus(id, body, token);
 	}
 
+	@PatchMapping("/{id}/assign")
+	public Object assign(@PathVariable Long id,
+	                     @RequestBody Map<String, Object> body,
+	                     @RequestHeader("Token") String token) {
+		return TS.assign(id, body, token);
+	}
+
 	@DeleteMapping("/{id}")
 	public Object delete(@PathVariable Long id,
 	                     @RequestHeader("Token") String token) {

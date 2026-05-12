@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { apibaseurl, callApi } from '../lib';
 import './AdminPages.css';
+import './TaskManager.css';
+import PageHeader from './PageHeader';
 
-/**
- * Admin-only page to create tasks and assign them to a role or to a specific user,
- * plus a table of every task in the system.
- */
 const TaskManager = ({ token }) => {
     const [roles, setRoles] = useState([]);
     const [users, setUsers] = useState([]);
@@ -15,9 +13,11 @@ const TaskManager = ({ token }) => {
     const empty = {
         title: "",
         description: "",
-        assigneeType: "ROLE",  // ROLE | USER
+        assigneeType: "ROLE",   // ROLE | USER
         assigneeId: "",
-        dueDate: ""
+        dueDate: "",
+        hours: "",
+        minutes: ""
     };
     const [form, setForm] = useState(empty);
 
@@ -55,16 +55,32 @@ const TaskManager = ({ token }) => {
         }
     }
 
+    /** Picking an existing task from the dropdown copies its title into the manual input. */
+    function onPickExisting(e) {
+        const taskId = e.target.value;
+        if (!taskId) return;
+        const t = tasks.find(x => String(x.id) === String(taskId));
+        if (!t) return;
+        setForm(prev => ({
+            ...prev,
+            title: t.title || "",
+            description: t.description || prev.description
+        }));
+    }
+
     function submit() {
         if (!form.title.trim()) { alert("Title is required"); return; }
-        if (!form.assigneeId) { alert("Pick an assignee"); return; }
+        if (!form.assigneeId)    { alert("Pick an assignee"); return; }
 
         const payload = {
             title: form.title.trim(),
             description: form.description.trim(),
             assigneeType: form.assigneeType,
             assigneeId: Number(form.assigneeId),
-            dueDate: form.dueDate ? form.dueDate + "T23:59:00" : ""
+            dueDate: form.dueDate ? form.dueDate + "T23:59:00" : "",
+            workDate: form.dueDate ? form.dueDate + "T00:00:00" : "",
+            hours:   form.hours   === "" ? null : Number(form.hours),
+            minutes: form.minutes === "" ? null : Number(form.minutes)
         };
         callApi("POST", apibaseurl + "/tasks", payload, null, (res) => {
             if (res && res.code === 200) {
@@ -99,95 +115,146 @@ const TaskManager = ({ token }) => {
     }
 
     return (
-        <div className="ap">
-            <div className="ap-section">
-                <h3 className="ap-title">Create New Task</h3>
-                <div className="ap-form">
-                    <div className="ap-field ap-full">
-                        <label>Title*</label>
-                        <input name="title" value={form.title} onChange={onChange} placeholder="e.g. Update Q2 invoice template" />
-                    </div>
-                    <div className="ap-field ap-full">
-                        <label>Description</label>
-                        <textarea name="description" value={form.description} onChange={onChange} placeholder="Optional details" />
-                    </div>
-                    <div className="ap-field">
-                        <label>Assign To</label>
-                        <select name="assigneeType" value={form.assigneeType} onChange={onChange}>
-                            <option value="ROLE">A role</option>
-                            <option value="USER">A specific user</option>
-                        </select>
-                    </div>
-                    <div className="ap-field">
-                        <label>{form.assigneeType === "ROLE" ? "Role*" : "User*"}</label>
-                        <select name="assigneeId" value={form.assigneeId} onChange={onChange}>
-                            <option value="">Select…</option>
-                            {form.assigneeType === "ROLE"
-                                ? roles.map(r => <option key={r.role} value={r.role}>{r.rolename}</option>)
-                                : users.map(u => <option key={u.id} value={u.id}>{u.fullname} ({u.email})</option>)
-                            }
-                        </select>
-                    </div>
-                    <div className="ap-field">
-                        <label>Due Date</label>
-                        <input type="date" name="dueDate" value={form.dueDate} onChange={onChange} />
-                    </div>
-                    <div className="ap-form-actions">
-                        <button type="button" className="ap-ghost" onClick={() => setForm(empty)}>Reset</button>
-                        <button type="button" className="ap-primary" onClick={submit}>Create Task</button>
+        <>
+            <PageHeader
+                crumbs={["Admin", "Task Manager"]}
+                title="Task Manager"
+                subtitle="Create tasks and assign them to a role or a specific user."
+            />
+
+            <div className="ap">
+                <div className="ap-section">
+                    <h3 className="ap-title">Create New Task</h3>
+                    <div className="ap-form">
+
+                        {/* Task name with dropdown of existing + manual typing */}
+                        <div className="ap-field ap-full">
+                            <label>Task Name*</label>
+                            <div className="tm-title-row">
+                                <select
+                                    className="tm-title-select"
+                                    onChange={onPickExisting}
+                                    value=""
+                                    title="Pick an existing task to copy its name"
+                                >
+                                    <option value="">Pick existing…</option>
+                                    {tasks.map(t => (
+                                        <option key={t.id} value={t.id}>{t.title}</option>
+                                    ))}
+                                </select>
+                                <input
+                                    className="tm-title-input"
+                                    name="title"
+                                    placeholder="…or type a new task name"
+                                    value={form.title}
+                                    onChange={onChange}
+                                />
+                            </div>
+                            <div className="tm-hint">Pick from the dropdown to copy an existing name, or just type a new one.</div>
+                        </div>
+
+                        <div className="ap-field ap-full">
+                            <label>Description</label>
+                            <textarea name="description" value={form.description} onChange={onChange} placeholder="Optional details" />
+                        </div>
+
+                        <div className="ap-field">
+                            <label>Assign To</label>
+                            <select name="assigneeType" value={form.assigneeType} onChange={onChange}>
+                                <option value="ROLE">A role</option>
+                                <option value="USER">A specific user</option>
+                            </select>
+                        </div>
+                        <div className="ap-field">
+                            <label>{form.assigneeType === "ROLE" ? "Role*" : "User*"}</label>
+                            <select name="assigneeId" value={form.assigneeId} onChange={onChange}>
+                                <option value="">Select…</option>
+                                {form.assigneeType === "ROLE"
+                                    ? roles
+                                        .filter(r => (r.rolename || "").toLowerCase() !== "admin" && Number(r.role) !== 3)
+                                        .map(r => <option key={r.role} value={r.role}>{r.rolename}</option>)
+                                    : users
+                                        .filter(u => Number(u.role) !== 3)
+                                        .map(u => <option key={u.id} value={u.id}>{u.fullname} ({u.email})</option>)
+                                }
+                            </select>
+                        </div>
+
+                        <div className="ap-field">
+                            <label>Due / Work Date</label>
+                            <input type="date" name="dueDate" value={form.dueDate} onChange={onChange} />
+                        </div>
+                        <div className="ap-field">
+                            <label>Time allocated</label>
+                            <div className="tm-time-row">
+                                <input type="number" name="hours"   min="0" max="999" placeholder="Hours"   value={form.hours}   onChange={onChange} />
+                                <input type="number" name="minutes" min="0" max="59"  placeholder="Minutes" value={form.minutes} onChange={onChange} />
+                            </div>
+                        </div>
+
+                        <div className="ap-form-actions">
+                            <button type="button" className="ap-ghost" onClick={() => setForm(empty)}>Reset</button>
+                            <button type="button" className="ap-primary" onClick={submit}>Create Task</button>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div className="ap-section">
-                <h3 className="ap-title">All Tasks</h3>
-                {loading && <div className="ap-empty">Loading…</div>}
-                {!loading && tasks.length === 0 && (
-                    <div className="ap-empty">No tasks yet — create one above.</div>
-                )}
-                {!loading && tasks.length > 0 && (
-                    <table className="ap-table">
-                        <thead>
-                            <tr>
-                                <th>Title</th>
-                                <th>Assignee</th>
-                                <th>Status</th>
-                                <th>Due</th>
-                                <th>Created</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {tasks.map(t => (
-                                <tr key={t.id}>
-                                    <td>
-                                        <div style={{ fontWeight: 600 }}>{t.title}</div>
-                                        {t.description && <div style={{ color: 'var(--text-muted)', fontSize: 12, marginTop: 2 }}>{t.description}</div>}
-                                    </td>
-                                    <td>
-                                        <span className="ap-assignee">
-                                            <span className="ap-assignee-type">{t.assigneeType}</span>
-                                            {t.assigneeName || "—"}
-                                        </span>
-                                    </td>
-                                    <td><span className={"ap-status ap-status-" + t.status}>{t.status}</span></td>
-                                    <td>{fmt(t.dueDate)}</td>
-                                    <td>{fmt(t.createdAt)}</td>
-                                    <td>
-                                        <div className="ap-row-actions">
-                                            {t.status !== "Completed" && (
-                                                <button className="ap-ghost" onClick={() => setStatus(t, "Completed")}>Mark Done</button>
-                                            )}
-                                            <button className="ap-danger" onClick={() => remove(t)}>Delete</button>
-                                        </div>
-                                    </td>
+                <div className="ap-section">
+                    <h3 className="ap-title">All Tasks</h3>
+                    {loading && <div className="ap-empty">Loading…</div>}
+                    {!loading && tasks.length === 0 && (
+                        <div className="ap-empty">No tasks yet — create one above.</div>
+                    )}
+                    {!loading && tasks.length > 0 && (
+                        <table className="ap-table">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Assignee</th>
+                                    <th>Status</th>
+                                    <th>Time</th>
+                                    <th>Date</th>
+                                    <th>Created</th>
+                                    <th></th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                )}
+                            </thead>
+                            <tbody>
+                                {tasks.map(t => (
+                                    <tr key={t.id}>
+                                        <td>
+                                            <div style={{ fontWeight: 600 }}>{t.title}</div>
+                                            {t.description && <div style={{ color: 'var(--text-muted)', fontSize: 12, marginTop: 2 }}>{t.description}</div>}
+                                        </td>
+                                        <td>
+                                            <span className="ap-assignee">
+                                                <span className="ap-assignee-type">{t.assigneeType}</span>
+                                                {t.assigneeName || "—"}
+                                            </span>
+                                        </td>
+                                        <td><span className={"ap-status ap-status-" + t.status}>{t.status}</span></td>
+                                        <td>
+                                            {(t.hours != null || t.minutes != null)
+                                                ? `${t.hours || 0}h ${t.minutes || 0}m`
+                                                : "—"}
+                                        </td>
+                                        <td>{fmt(t.workDate || t.dueDate)}</td>
+                                        <td>{fmt(t.createdAt)}</td>
+                                        <td>
+                                            <div className="ap-row-actions">
+                                                {t.status !== "Completed" && (
+                                                    <button className="ap-ghost" onClick={() => setStatus(t, "Completed")}>Mark Done</button>
+                                                )}
+                                                <button className="ap-danger" onClick={() => remove(t)}>Delete</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
+                </div>
             </div>
-        </div>
+        </>
     );
 };
 

@@ -7,7 +7,7 @@
     height: 100%;
     background: var(--background-secondary);
     display: grid;
-    grid-template-rows: 60px 1fr 32px;
+    grid-template-rows: 64px 1fr 32px;
 }
 
 /* ===== Header ===== */
@@ -22,39 +22,132 @@
     z-index: 5;
 }
 
-.home .home-header img {
-    width: 130px;
-    height: 44px;
+.home .home-header-left {
+    display: flex;
+    align-items: center;
+}
+
+.home .home-header-left .brand-logo {
+    width: 140px;
+    height: 46px;
     object-fit: contain;
 }
 
-.home .home-header .info {
+.home .home-header-right {
     display: flex;
     align-items: center;
-    gap: 12px;
-    font-weight: 500;
+    gap: 16px;
+}
+
+.home .home-clock {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    line-height: 1.1;
+    padding-right: 16px;
+    border-right: 1px solid var(--border-color);
+    user-select: none;
+}
+
+.home .home-clock-time {
+    font-size: 16px;
+    font-weight: 600;
     color: var(--text-dark);
-    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
 }
 
-.home .home-header .info img {
-    width: 28px;
-    height: 28px;
-    cursor: pointer;
-    padding: 4px;
+.home .home-clock-date {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.home .home-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.home .home-avatar {
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
-    transition: background var(--transition), transform var(--transition);
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.02em;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+    user-select: none;
 }
 
-.home .home-header .info img:hover {
+.home .home-avatar.is-admin   { background: linear-gradient(135deg, #ef4444, #b91c1c); box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3); }
+.home .home-avatar.is-manager { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+.home .home-avatar.is-user    { background: linear-gradient(135deg, #10b981, #047857); box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25); }
+
+.home .home-user-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+}
+
+.home .home-user-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.home .home-role-badge {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 4px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
     background: var(--background-tertiary);
+    color: var(--text-gray);
+    width: fit-content;
+}
+
+.home .home-role-badge.is-admin   { background: #fee2e2; color: #b91c1c; }
+.home .home-role-badge.is-manager { background: #dbeafe; color: #1d4ed8; }
+.home .home-role-badge.is-user    { background: #dcfce7; color: #166534; }
+
+.home .home-logout {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: var(--background-tertiary);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--transition), transform var(--transition);
+    padding: 0;
+}
+
+.home .home-logout img {
+    width: 18px;
+    height: 18px;
+}
+
+.home .home-logout:hover {
+    background: #fee2e2;
     transform: scale(1.05);
 }
 
 /* ===== Workspace ===== */
 .home .home-workspace {
     display: grid;
-    grid-template-columns: 240px 1fr;
+    grid-template-columns: 248px 1fr;
     overflow: hidden;
 }
 
@@ -63,18 +156,75 @@
     background: var(--primary-blue);
     color: #cbd5e1;
     overflow: auto;
-    padding: 16px 10px;
+    padding: 16px 12px 8px;
     border-right: 1px solid rgba(255, 255, 255, 0.04);
+    display: flex;
+    flex-direction: column;
+}
+
+.home .home-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 6px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    margin-bottom: 12px;
+}
+
+.home .home-brand-mark {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: #fff;
+    font-weight: 800;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.02em;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+}
+
+.home .home-brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+}
+
+.home .home-brand-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: -0.01em;
+}
+
+.home .home-brand-sub {
+    font-size: 10px;
+    color: #94a3b8;
+    margin-top: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.home .home-section {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #64748b;
+    padding: 6px 14px 6px;
+    margin-top: 6px;
 }
 
 .home .home-workspace .home-menus ul {
     list-style: none;
-    margin: 0;
+    margin: 0 0 8px 0;
     padding: 0;
 }
 
 .home .home-workspace .home-menus ul li {
-    height: 42px;
+    height: 40px;
     margin-bottom: 4px;
     padding: 0 14px;
     border-radius: var(--radius-sm);
@@ -112,6 +262,20 @@
     opacity: 1;
 }
 
+.home .home-workspace .home-menus ul li .menu-label {
+    flex: 1;
+}
+
+.home .home-sidebar-footer {
+    margin-top: auto;
+    padding: 12px 14px;
+    font-size: 10px;
+    color: #64748b;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
 /* ===== Content ===== */
 .home .home-workspace .home-content {
     background: var(--background-secondary);
@@ -137,4 +301,9 @@
     color: var(--text-muted);
     border-top: 1px solid var(--border-color);
     letter-spacing: 0.02em;
+}
+
+@media (max-width: 900px) {
+    .home .home-clock { display: none; }
+    .home .home-workspace { grid-template-columns: 200px 1fr; }
 }

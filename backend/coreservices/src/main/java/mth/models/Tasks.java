@@ -44,6 +44,17 @@ public class Tasks {
     @Column(name = "due_date")
     LocalDateTime dueDate;
 
+    /** Date the task is scheduled to be worked on (separate from due date). */
+    @Column(name = "work_date")
+    LocalDateTime workDate;
+
+    /** Time allocated to the task in hours/minutes. */
+    @Column(name = "hours")
+    Integer hours;
+
+    @Column(name = "minutes")
+    Integer minutes;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getTitle() { return title; }
@@ -62,4 +73,10 @@ public class Tasks {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getDueDate() { return dueDate; }
     public void setDueDate(LocalDateTime dueDate) { this.dueDate = dueDate; }
+    public LocalDateTime getWorkDate() { return workDate; }
+    public void setWorkDate(LocalDateTime workDate) { this.workDate = workDate; }
+    public Integer getHours() { return hours; }
+    public void setHours(Integer hours) { this.hours = hours; }
+    public Integer getMinutes() { return minutes; }
+    public void setMinutes(Integer minutes) { this.minutes = minutes; }
 }

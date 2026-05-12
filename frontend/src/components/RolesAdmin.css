@@ -3,10 +3,9 @@
 -------------------------------------------------------------- */
 .roles-admin {
     width: 100%;
-    height: 100%;
-    padding: 28px 32px;
+    padding: 22px 32px 32px;
     box-sizing: border-box;
-    overflow: auto;
+    overflow: visible;
     background: var(--background-secondary);
 }
 
@@ -302,4 +301,155 @@
     .roles-admin .ra-title {
         min-width: 140px;
     }
+}
+
+/* ===== Delete Mappings section ===== */
+.roles-admin .ra-delete-section {
+    margin-top: 30px;
+}
+
+.roles-admin .ra-delete-section .ra-title {
+    margin-bottom: 16px;
+}
+
+.roles-admin .ra-delete-toolbar {
+    display: flex;
+    align-items: flex-end;
+    gap: 14px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.roles-admin .ra-delete-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 240px;
+}
+
+.roles-admin .ra-delete-filter-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-gray);
+}
+
+.roles-admin .ra-delete-filter select {
+    height: 38px;
+    padding: 0 36px 0 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--background);
+    color: var(--text-dark);
+    font-size: 14px;
+    cursor: pointer;
+    appearance: none;
+    background-image:
+        linear-gradient(45deg, transparent 50%, var(--text-gray) 50%),
+        linear-gradient(135deg, var(--text-gray) 50%, transparent 50%);
+    background-position:
+        calc(100% - 18px) 50%,
+        calc(100% - 12px) 50%;
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.roles-admin .ra-delete-filter select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.roles-admin .ra-delete-refresh {
+    height: 38px;
+    padding: 0 14px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--background);
+    color: var(--text-dark);
+    font-weight: 500;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background var(--transition), border-color var(--transition);
+    box-shadow: none;
+}
+
+.roles-admin .ra-delete-refresh:hover {
+    background: var(--background-tertiary);
+    border-color: var(--border-strong);
+}
+
+.roles-admin .ra-delete-list {
+    max-height: 360px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--background);
+    box-shadow: var(--shadow-sm);
+}
+
+.roles-admin .ra-delete-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+    transition: background var(--transition);
+}
+
+.roles-admin .ra-delete-row:last-child {
+    border-bottom: none;
+}
+
+.roles-admin .ra-delete-row:hover {
+    background: var(--background-secondary);
+}
+
+.roles-admin .ra-delete-row.orphan {
+    background: #fff7ed;
+}
+
+.roles-admin .ra-delete-row.orphan .ra-delete-role,
+.roles-admin .ra-delete-row.orphan .ra-delete-menu {
+    color: #c2410c;
+    font-style: italic;
+}
+
+.roles-admin .ra-delete-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    min-width: 0;
+}
+
+.roles-admin .ra-delete-role {
+    font-weight: 600;
+    color: var(--primary-color);
+    min-width: 110px;
+}
+
+.roles-admin .ra-delete-menu {
+    color: var(--text-gray);
+}
+
+.roles-admin .ra-delete-btn {
+    flex-shrink: 0;
+    height: 30px;
+    padding: 0 12px;
+    background: var(--background);
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition), border-color var(--transition);
+    box-shadow: none;
+}
+
+.roles-admin .ra-delete-btn:hover {
+    background: #ef4444;
+    color: #fff;
+    border-color: #ef4444;
 }

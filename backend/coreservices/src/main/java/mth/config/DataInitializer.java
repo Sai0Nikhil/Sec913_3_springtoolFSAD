@@ -15,13 +15,15 @@ import mth.repository.RolesRepository;
 import mth.repository.RolesmappingRepository;
 
 /**
- * Seeds the "Roles" admin menu and maps it to the Admin role (id 3)
+ * Seeds the "Role Manager" admin menu and maps it to the Admin role (id 3)
  * on application startup if it isn't already present.
  *
  * Idempotent: only inserts when the rows are missing.
  */
 @Component
 public class DataInitializer implements CommandLineRunner {
+
+	private static final String ROLE_MANAGER_MENU = "Role Manager";
 
 	@Autowired
 	private MenusRepository menusRepo;
@@ -35,28 +37,27 @@ public class DataInitializer implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 		try {
-			// 1. Ensure "Roles" menu exists
+			// 1. Ensure "Role Manager" menu exists
 			List<Menus> allMenus = menusRepo.findAll();
-			Optional<Menus> rolesMenuOpt = allMenus.stream()
-					.filter(m -> m.getMenu() != null && m.getMenu().equalsIgnoreCase("Roles"))
+			Optional<Menus> roleManagerOpt = allMenus.stream()
+					.filter(m -> m.getMenu() != null && m.getMenu().equalsIgnoreCase(ROLE_MANAGER_MENU))
 					.findFirst();
 
-			Menus rolesMenu;
-			if (rolesMenuOpt.isPresent()) {
-				rolesMenu = rolesMenuOpt.get();
-				System.out.println("[DataInitializer] 'Roles' menu already present (mid=" + rolesMenu.getMid() + ")");
+			Menus roleManagerMenu;
+			if (roleManagerOpt.isPresent()) {
+				roleManagerMenu = roleManagerOpt.get();
+				System.out.println("[DataInitializer] '" + ROLE_MANAGER_MENU + "' menu already present (mid=" + roleManagerMenu.getMid() + ")");
 			} else {
-				rolesMenu = new Menus();
+				roleManagerMenu = new Menus();
 				Long nextMid = (menusRepo.getMaxMenuId() == null ? 0L : menusRepo.getMaxMenuId()) + 1;
-				rolesMenu.setMid(nextMid);
-				rolesMenu.setMenu("Roles");
-				rolesMenu.setIcon("menu.png");
-				menusRepo.save(rolesMenu);
-				System.out.println("[DataInitializer] Inserted 'Roles' menu with mid=" + nextMid);
+				roleManagerMenu.setMid(nextMid);
+				roleManagerMenu.setMenu(ROLE_MANAGER_MENU);
+				roleManagerMenu.setIcon("usermanager.png");
+				menusRepo.save(roleManagerMenu);
+				System.out.println("[DataInitializer] Inserted '" + ROLE_MANAGER_MENU + "' menu with mid=" + nextMid);
 			}
 
-			// 2. Ensure Admin role (id 3) is mapped to "Roles" menu.
-			//    If role 3 doesn't exist yet, create it as 'Admin'.
+			// 2. Ensure Admin role (id 3) exists
 			Optional<Roles> adminOpt = rolesRepo.findById(3L);
 			if (!adminOpt.isPresent()) {
 				Roles admin = new Roles();
@@ -66,19 +67,20 @@ public class DataInitializer implements CommandLineRunner {
 				System.out.println("[DataInitializer] Inserted default Admin role (id=3)");
 			}
 
+			// 3. Map "Role Manager" to Admin if not already mapped
 			List<Rolesmapping> existing = mappingRepo.findByRole(3L);
 			boolean alreadyMapped = existing.stream()
-					.anyMatch(rm -> rm.getMid() != null && rm.getMid().equals(rolesMenu.getMid()));
+					.anyMatch(rm -> rm.getMid() != null && rm.getMid().equals(roleManagerMenu.getMid()));
 
 			if (!alreadyMapped) {
 				Rolesmapping rm = new Rolesmapping();
 				rm.setRole(3L);
-				rm.setMid(rolesMenu.getMid());
+				rm.setMid(roleManagerMenu.getMid());
 				mappingRepo.save(rm);
-				System.out.println("[DataInitializer] Mapped 'Roles' menu (mid="
-						+ rolesMenu.getMid() + ") to Admin role (3)");
+				System.out.println("[DataInitializer] Mapped '" + ROLE_MANAGER_MENU + "' menu (mid="
+						+ roleManagerMenu.getMid() + ") to Admin role (3)");
 			} else {
-				System.out.println("[DataInitializer] 'Roles' menu already mapped to Admin role.");
+				System.out.println("[DataInitializer] '" + ROLE_MANAGER_MENU + "' menu already mapped to Admin role.");
 			}
 		} catch (Exception e) {
 			System.err.println("[DataInitializer] Seed failed: " + e.getMessage());

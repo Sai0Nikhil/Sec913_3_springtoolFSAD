@@ -128,8 +128,12 @@ public class UsersService {
 	        List<Object> menuList = UR.getMenus(Long.valueOf(U.getRole()));
 
 	        response.put("code", 200);
+	        response.put("id", U.getId());
 	        response.put("fullname", U.getFullname());
+	        response.put("email", U.getEmail());
+	        response.put("phone", U.getPhone());
 	        response.put("role", U.getRole());
+	        response.put("status", U.getStatus());
 	        response.put("menulist", menuList);
 		}catch(Exception e)
 		{

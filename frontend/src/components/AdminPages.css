@@ -4,10 +4,9 @@
 -------------------------------------------------------------- */
 .ap {
     width: 100%;
-    height: 100%;
-    padding: 28px 32px;
+    padding: 22px 32px 32px;
     box-sizing: border-box;
-    overflow: auto;
+    overflow: visible;
     background: var(--background-secondary);
 }
 

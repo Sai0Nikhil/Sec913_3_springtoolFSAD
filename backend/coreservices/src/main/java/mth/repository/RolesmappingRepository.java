@@ -20,6 +20,11 @@ public interface RolesmappingRepository extends JpaRepository<Rolesmapping, Role
     @Transactional
     void deleteByRole(Long role);
 
+    /** Delete one specific (role, mid) row. */
+    @Modifying
+    @Transactional
+    long deleteByRoleAndMid(Long role, Long mid);
+
     /**
      * Returns every row in rolesmapping along with the matching role name and menu name.
      * Uses a native query (PostgreSQL) so we don't rely on JPQL ad-hoc joins between

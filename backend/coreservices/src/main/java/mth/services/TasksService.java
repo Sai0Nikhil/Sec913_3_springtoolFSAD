@@ -78,6 +78,19 @@ public class TasksService {
 				try { t.setDueDate(LocalDateTime.parse(due.toString())); }
 				catch (Exception ignore) { /* leave null */ }
 			}
+			Object work = body.get("workDate");
+			if (work != null && !work.toString().isEmpty()) {
+				try { t.setWorkDate(LocalDateTime.parse(work.toString())); }
+				catch (Exception ignore) { /* leave null */ }
+			}
+			if (body.get("hours") != null) {
+				try { t.setHours(Integer.parseInt(body.get("hours").toString())); }
+				catch (Exception ignore) { }
+			}
+			if (body.get("minutes") != null) {
+				try { t.setMinutes(Integer.parseInt(body.get("minutes").toString())); }
+				catch (Exception ignore) { }
+			}
 
 			repo.save(t);
 
@@ -130,6 +143,58 @@ public class TasksService {
 			for (Tasks t : mine) enriched.add(enrich(t));
 			response.put("code", 200);
 			response.put("tasks", enriched);
+		} catch (Exception e) {
+			response.put("code", 500);
+			response.put("message", e.getMessage());
+		}
+		return response;
+	}
+
+	/**
+	 * Assign an existing task to a user with date + hours + minutes.
+	 * Body: { userId, workDate, hours, minutes }
+	 * Admin only.
+	 */
+	@Transactional
+	public Object assign(Long id, Map<String, Object> body, String token) {
+		Map<String, Object> response = new HashMap<>();
+		try {
+			Map<String, Object> claims = JWT.validateJWT(token);
+			Integer role = ((Number) claims.get("role")).intValue();
+			if (role == null || role != 3) {
+				response.put("code", 403);
+				response.put("message", "Admin only");
+				return response;
+			}
+			Tasks t = repo.findById(id).orElse(null);
+			if (t == null) {
+				response.put("code", 404);
+				response.put("message", "Task not found");
+				return response;
+			}
+			if (body.get("userId") != null) {
+				try {
+					Long uid = Long.valueOf(body.get("userId").toString());
+					t.setAssigneeType("USER");
+					t.setAssigneeId(uid);
+				} catch (Exception ignore) { }
+			}
+			if (body.get("workDate") != null && !body.get("workDate").toString().isEmpty()) {
+				try { t.setWorkDate(LocalDateTime.parse(body.get("workDate").toString())); }
+				catch (Exception ignore) { }
+			}
+			if (body.get("hours") != null) {
+				try { t.setHours(Integer.parseInt(body.get("hours").toString())); }
+				catch (Exception ignore) { }
+			}
+			if (body.get("minutes") != null) {
+				try { t.setMinutes(Integer.parseInt(body.get("minutes").toString())); }
+				catch (Exception ignore) { }
+			}
+			repo.save(t);
+			response.put("code", 200);
+			response.put("message", "Task assigned");
+			response.put("task", enrich(t));
 		} catch (Exception e) {
 			response.put("code", 500);
 			response.put("message", e.getMessage());
@@ -221,6 +286,9 @@ public class TasksService {
 		m.put("createdBy", t.getCreatedBy());
 		m.put("createdAt", t.getCreatedAt() != null ? t.getCreatedAt().toString() : null);
 		m.put("dueDate",   t.getDueDate()   != null ? t.getDueDate().toString()   : null);
+		m.put("workDate",  t.getWorkDate()  != null ? t.getWorkDate().toString()  : null);
+		m.put("hours",     t.getHours());
+		m.put("minutes",   t.getMinutes());
 
 		String assigneeName = null;
 		if ("ROLE".equals(t.getAssigneeType()) && t.getAssigneeId() != null) {

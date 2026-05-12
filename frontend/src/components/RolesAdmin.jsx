@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { apibaseurl, callApi } from '../lib';
 import './RolesAdmin.css';
+import PageHeader from './PageHeader';
 
 const RolesAdmin = ({ token }) => {
     const [roles, setRoles] = useState([]);
@@ -17,9 +18,15 @@ const RolesAdmin = ({ token }) => {
     const [allMappings, setAllMappings] = useState([]);
     const [loadingMappings, setLoadingMappings] = useState(false);
 
+    // "Delete Mappings" panel (separate from Show Mappings)
+    const [deleteList, setDeleteList] = useState([]);
+    const [deleteLoading, setDeleteLoading] = useState(false);
+    const [deleteFilter, setDeleteFilter] = useState(""); // role id filter, "" = all
+
     useEffect(() => {
         loadRoles();
         loadMenus();
+        loadDeleteList();
     }, []);
 
     function loadRoles() {
@@ -109,6 +116,27 @@ const RolesAdmin = ({ token }) => {
         if (next) loadAllMappings();
     }
 
+    function loadDeleteList() {
+        setDeleteLoading(true);
+        callApi("GET", apibaseurl + "/mapping/list-all", null, null, (res) => {
+            setDeleteLoading(false);
+            if (Array.isArray(res)) setDeleteList(res);
+            else setDeleteList([]);
+        }, token);
+    }
+
+    function deleteOneMapping(roleId, mid, roleLabel, menuLabel) {
+        if (!confirm(`Remove mapping  ${roleLabel}  →  ${menuLabel} ?`)) return;
+        callApi("DELETE", apibaseurl + "/mapping/" + roleId + "/" + mid, null, null, (res) => {
+            if (res && res.code === 200) {
+                loadDeleteList();
+                if (showMappings) loadAllMappings(); // keep "Show Mappings" in sync
+            } else {
+                alert((res && res.message) || "Failed to delete mapping");
+            }
+        }, token);
+    }
+
     function saveMapping() {
         if (!selectedRole) {
             alert("Please select a role");
@@ -127,6 +155,7 @@ const RolesAdmin = ({ token }) => {
             if (res && res.code === 200) {
                 alert("Mappings saved successfully");
                 if (showMappings) loadAllMappings();
+                loadDeleteList();
             } else if (typeof res === "string") {
                 alert(res);
             } else {
@@ -136,6 +165,12 @@ const RolesAdmin = ({ token }) => {
     }
 
     return (
+        <>
+        <PageHeader
+            crumbs={["Admin", "Role Manager"]}
+            title="Role Manager"
+            subtitle="Add roles, add menus, map menus to roles. Scroll down to delete individual mappings."
+        />
         <div className="roles-admin">
             {/* --- Roles section --- */}
             <div className="ra-section">
@@ -228,7 +263,69 @@ const RolesAdmin = ({ token }) => {
                     </div>
                 </div>
             </div>
+
+            {/* --- Delete Mappings (scroll down for this) --- */}
+            <div className="ra-section ra-delete-section">
+                <label className="ra-title">Delete Mappings</label>
+
+                <div className="ra-delete-toolbar">
+                    <div className="ra-delete-filter">
+                        <label className="ra-delete-filter-label">Filter by role</label>
+                        <select
+                            value={deleteFilter}
+                            onChange={(e) => setDeleteFilter(e.target.value)}
+                        >
+                            <option value="">All roles</option>
+                            {roles.map(r => (
+                                <option key={r.role} value={r.role}>{r.rolename}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <button
+                        type="button"
+                        className="ra-delete-refresh"
+                        onClick={loadDeleteList}
+                        title="Refresh"
+                    >↻ Refresh</button>
+                </div>
+
+                <div className="ra-delete-list">
+                    {deleteLoading && <div className="ra-mappings-empty">Loading…</div>}
+                    {!deleteLoading && (() => {
+                        const filtered = deleteFilter === ""
+                            ? deleteList
+                            : deleteList.filter(m => Number(m.roleId) === Number(deleteFilter));
+                        if (filtered.length === 0) {
+                            return <div className="ra-mappings-empty">No mappings to delete.</div>;
+                        }
+                        return filtered.map((m, i) => {
+                            const roleLabel = m.roleName ? m.roleName : `(missing role #${m.roleId})`;
+                            const menuLabel = m.menu     ? m.menu     : `(missing menu #${m.mid})`;
+                            const isOrphan = !m.roleName || !m.menu;
+                            return (
+                                <div
+                                    className={"ra-delete-row " + (isOrphan ? "orphan" : "")}
+                                    key={`${m.roleId}-${m.mid}-${i}`}
+                                >
+                                    <div className="ra-delete-info">
+                                        <span className="ra-delete-role">{roleLabel}</span>
+                                        <span className="ra-mapping-arrow">→</span>
+                                        <span className="ra-delete-menu">{menuLabel}</span>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        className="ra-delete-btn"
+                                        onClick={() => deleteOneMapping(m.roleId, m.mid, roleLabel, menuLabel)}
+                                        title="Delete mapping"
+                                    >× Delete</button>
+                                </div>
+                            );
+                        });
+                    })()}
+                </div>
+            </div>
         </div>
+        </>
     );
 };
 

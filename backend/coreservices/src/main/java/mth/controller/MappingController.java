@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import mth.models.Rolesmapping;
 import mth.repository.RolesmappingRepository;
+import mth.services.JwtService;
 
 @RestController
 @RequestMapping("/mapping")
@@ -19,6 +20,9 @@ public class MappingController {
 
     @Autowired
     RolesmappingRepository repo;
+
+    @Autowired
+    JwtService JWT;
 
     @GetMapping("/{role}")
     public List<Rolesmapping> getRoleMappings(@PathVariable Long role) {
@@ -37,6 +41,39 @@ public class MappingController {
             }
             response.put("code", 200);
             response.put("message", "Mappings saved successfully");
+        } catch (Exception e) {
+            response.put("code", 500);
+            response.put("message", e.getMessage());
+        }
+        return response;
+    }
+
+    /**
+     * Delete one specific (role, mid) mapping. Admin only.
+     */
+    @DeleteMapping("/{role}/{mid}")
+    @Transactional
+    public Object deleteOneMapping(@PathVariable Long role,
+                                   @PathVariable Long mid,
+                                   @RequestHeader("Token") String token) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            Map<String, Object> claims = JWT.validateJWT(token);
+            Integer claimRole = ((Number) claims.get("role")).intValue();
+            if (claimRole == null || claimRole != 3) {
+                response.put("code", 403);
+                response.put("message", "Admin only");
+                return response;
+            }
+            long removed = repo.deleteByRoleAndMid(role, mid);
+            if (removed == 0) {
+                response.put("code", 404);
+                response.put("message", "Mapping not found");
+                return response;
+            }
+            response.put("code", 200);
+            response.put("message", "Mapping deleted");
+            response.put("removed", removed);
         } catch (Exception e) {
             response.put("code", 500);
             response.put("message", e.getMessage());

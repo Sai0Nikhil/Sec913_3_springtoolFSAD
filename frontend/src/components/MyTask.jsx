@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { apibaseurl, callApi } from '../lib';
 import './AdminPages.css';
+import PageHeader from './PageHeader';
 
 /**
  * Personal task view — shows tasks assigned to me by user id OR by my role.
@@ -36,6 +37,12 @@ const MyTask = ({ token }) => {
     }
 
     return (
+        <>
+        <PageHeader
+            crumbs={["Home", "My Task"]}
+            title="My Tasks"
+            subtitle="Everything assigned to you, directly or through your role."
+        />
         <div className="ap">
             <div className="ap-section">
                 <h3 className="ap-title">My Tasks</h3>
@@ -91,6 +98,7 @@ const MyTask = ({ token }) => {
                 )}
             </div>
         </div>
+        </>
     );
 };
 

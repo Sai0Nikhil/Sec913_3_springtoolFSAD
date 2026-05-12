@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { apibaseurl, callApi } from '../lib';
 import './AdminPages.css';
+import PageHeader from './PageHeader';
 
 /**
  * Admin-only: list every user with their role mapping, status, and contact info.
@@ -40,6 +41,12 @@ const UserManager = ({ token }) => {
     }
 
     return (
+        <>
+        <PageHeader
+            crumbs={["Admin", "User Manager"]}
+            title="Users"
+            subtitle="All registered users with their role mapping. Search by name, email, or role."
+        />
         <div className="ap">
             <div className="ap-section">
                 <h3 className="ap-title">Users</h3>
@@ -93,6 +100,7 @@ const UserManager = ({ token }) => {
                 )}
             </div>
         </div>
+        </>
     );
 };
 
