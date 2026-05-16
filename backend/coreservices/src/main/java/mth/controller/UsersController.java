@@ -71,4 +71,13 @@ public class UsersController {
 	{
 		return US.listAllUsers(token);
 	}
+
+	/** Admin only — grant/revoke a user's permission to assign admin-created tasks. */
+	@org.springframework.web.bind.annotation.PatchMapping("/users/{id}/can-assign")
+	public Object setCanAssign(@org.springframework.web.bind.annotation.PathVariable Long id,
+	                           @RequestBody Map<String, Object> body,
+	                           @RequestHeader("Token") String token)
+	{
+		return US.setCanAssign(token, id, body);
+	}
 }

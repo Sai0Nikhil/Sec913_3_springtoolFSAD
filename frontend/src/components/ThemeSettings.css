@@ -1,0 +1,159 @@
+/* -------------------------------------------------------------
+   Theme picker — palette button + slide-in panel
+-------------------------------------------------------------- */
+
+/* Trigger button (placed in Home header) */
+.ts-trigger {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: var(--background-tertiary);
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--transition), transform var(--transition);
+    padding: 0;
+}
+
+.ts-trigger:hover {
+    background: #e0e7ff;
+    transform: rotate(-12deg) scale(1.05);
+}
+
+/* Overlay */
+.ts-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.35);
+    backdrop-filter: blur(2px);
+    z-index: 1500;
+    animation: tsFadeIn 0.16s ease-out;
+}
+
+@keyframes tsFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Slide-in panel */
+.ts-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: 320px;
+    max-width: 92vw;
+    background: #fff;
+    box-shadow: -16px 0 40px rgba(15, 23, 42, 0.18);
+    z-index: 1600;
+    display: flex;
+    flex-direction: column;
+    animation: tsSlideIn 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes tsSlideIn {
+    from { transform: translateX(100%); }
+    to   { transform: translateX(0); }
+}
+
+.ts-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px;
+    background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+    color: #fff;
+}
+
+.ts-head h3 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.ts-close {
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #fff;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--transition);
+}
+
+.ts-close:hover { background: rgba(255, 255, 255, 0.3); }
+
+.ts-body {
+    padding: 22px;
+    overflow-y: auto;
+}
+
+.ts-section-label {
+    font-size: 13px;
+    color: var(--text-dark);
+    font-weight: 600;
+    margin-bottom: 14px;
+}
+
+.ts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
+.ts-swatch {
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    border: 3px solid transparent;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+    position: relative;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
+}
+
+.ts-swatch:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(15, 23, 42, 0.18);
+}
+
+.ts-swatch.is-active {
+    border-color: var(--text-dark);
+    box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.08), 0 8px 16px rgba(15, 23, 42, 0.2);
+}
+
+.ts-check {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 22px;
+    font-weight: 800;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.ts-active-name {
+    margin-top: 18px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-gray);
+    font-style: italic;
+}
+
+@media (max-width: 600px) {
+    .ts-panel { width: 100vw; }
+}

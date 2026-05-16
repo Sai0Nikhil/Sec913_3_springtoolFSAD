@@ -31,7 +31,8 @@ public interface UsersRepository extends JpaRepository<Users, Long> {
 	 * Returns Object[]: { id, fullname, email, phone, role, rolename, status }
 	 */
 	@Query(value =
-		"SELECT u.id, u.fullname, u.email, u.phone, u.role, r.rolename, u.status " +
+		"SELECT u.id, u.fullname, u.email, u.phone, u.role, r.rolename, u.status, " +
+		"       COALESCE(u.can_assign_tasks, 0) AS can_assign_tasks " +
 		"FROM users u LEFT JOIN roles r ON r.role = u.role " +
 		"ORDER BY u.id ASC",
 		nativeQuery = true)

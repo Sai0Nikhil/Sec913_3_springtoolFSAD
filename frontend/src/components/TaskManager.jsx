@@ -5,11 +5,28 @@ import './TaskManager.css';
 import PageHeader from './PageHeader';
 import { downloadCsv, downloadPdfTable, fmtDateTime } from '../exports.js';
 
+// Pull the current user's role from the JWT so we can adapt the UI.
+function readRoleFromToken(t) {
+    try {
+        if (!t) return null;
+        const parts = t.split('.');
+        if (parts.length < 2) return null;
+        const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+        return payload.role == null ? null : Number(payload.role);
+    } catch { return null; }
+}
+
 const TaskManager = ({ token }) => {
     const [roles, setRoles] = useState([]);
     const [users, setUsers] = useState([]);
     const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(false);
+    const myRole = readRoleFromToken(token);
+    const isAdmin = myRole === 3;
+
+    // Handover/assign popover for the Manager's row-level button
+    const [assignFor, setAssignFor] = useState(null);   // task id
+    const [assignToUser, setAssignToUser] = useState("");
 
     const empty = {
         title: "",
@@ -22,6 +39,11 @@ const TaskManager = ({ token }) => {
     };
     const [form, setForm] = useState(empty);
     const [filter, setFilter] = useState("all");
+
+    // Bulk CSV import
+    const [bulkPreview, setBulkPreview] = useState([]);     // parsed titles awaiting confirm
+    const [bulkFileName, setBulkFileName] = useState("");
+    const [bulkBusy, setBulkBusy] = useState(false);
 
     useEffect(() => {
         loadRoles();
@@ -116,6 +138,87 @@ const TaskManager = ({ token }) => {
         catch { return d; }
     }
 
+    function onCsvPicked(e) {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        setBulkFileName(file.name);
+
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const raw = String(ev.target.result || "");
+            // Single-column CSV — split on newlines, strip optional surrounding quotes,
+            // ignore the first row if it looks like a header.
+            const lines = raw
+                .split(/\r?\n/)
+                .map(l => l.trim())
+                .map(l => l.replace(/^"(.*)"$/, "$1"))
+                .filter(l => l.length > 0);
+            if (lines.length === 0) {
+                alert("That file is empty.");
+                setBulkPreview([]);
+                return;
+            }
+            // Skip a header if first row reads like "title" / "task" / "name"
+            const first = lines[0].toLowerCase().replace(/[^a-z]/g, "");
+            const skipHeader = first === "title" || first === "task" || first === "name" || first === "tasks";
+            const titles = skipHeader ? lines.slice(1) : lines;
+            setBulkPreview(titles);
+        };
+        reader.onerror = () => alert("Failed to read file.");
+        reader.readAsText(file);
+        // Allow re-uploading the same file
+        e.target.value = "";
+    }
+
+    function submitBulk() {
+        if (bulkPreview.length === 0) { alert("Nothing to import."); return; }
+        if (!confirm(`Create ${bulkPreview.length} task(s) from "${bulkFileName}"? Each will land in the Assign queue.`)) return;
+        setBulkBusy(true);
+        callApi("POST", apibaseurl + "/tasks/bulk", { titles: bulkPreview }, null, (res) => {
+            setBulkBusy(false);
+            if (res && res.code === 200) {
+                alert(
+                    `Imported ${res.created} task(s).\n` +
+                    `Skipped blank: ${res.skippedBlank ?? 0}\n` +
+                    `Skipped too long: ${res.skippedTooLong ?? 0}` +
+                    (res.errors && res.errors.length ? `\nErrors: ${res.errors.length}` : "")
+                );
+                setBulkPreview([]);
+                setBulkFileName("");
+                loadTasks();
+            } else {
+                alert((res && res.message) || "Bulk import failed.");
+            }
+        }, token);
+    }
+
+    function cancelBulk() {
+        setBulkPreview([]);
+        setBulkFileName("");
+    }
+
+    function openAssign(t) {
+        setAssignFor(t.id);
+        setAssignToUser("");
+    }
+    function cancelAssign() {
+        setAssignFor(null);
+        setAssignToUser("");
+    }
+    function confirmAssign(t) {
+        if (!assignToUser) { alert("Pick a user."); return; }
+        callApi("PATCH", apibaseurl + "/tasks/" + t.id + "/assign",
+            { userId: Number(assignToUser) }, null, (res) => {
+                if (res && res.code === 200) {
+                    setAssignFor(null);
+                    setAssignToUser("");
+                    loadTasks();
+                } else {
+                    alert((res && res.message) || "Failed to assign");
+                }
+            }, token);
+    }
+
     function exportTasksPdf(rows, currentFilter) {
         const list = currentFilter === "all" ? rows : rows.filter(t => t.status === currentFilter);
         downloadPdfTable({
@@ -146,12 +249,15 @@ const TaskManager = ({ token }) => {
     return (
         <>
             <PageHeader
-                crumbs={["Admin", "Task Manager"]}
-                title="Task Manager"
-                subtitle="Create tasks and assign them to a role or a specific user."
+                crumbs={[isAdmin ? "Admin" : "Manager", "Task Manager"]}
+                title={isAdmin ? "Task Manager" : "Tasks Delegated to You"}
+                subtitle={isAdmin
+                    ? "Create tasks and hand them to a Manager — or assign directly to a User."
+                    : "Tasks the Admin handed to you. Assign each one to a User to send it down the line."}
             />
 
             <div className="ap">
+                {isAdmin && (
                 <div className="ap-section">
                     <h3 className="ap-title">Create New Task</h3>
                     <div className="ap-form">
@@ -227,10 +333,51 @@ const TaskManager = ({ token }) => {
                         </div>
                     </div>
                 </div>
+                )}
+
+                {/* ===== Bulk CSV import (admin only) ===== */}
+                {isAdmin && (
+                <div className="ap-section tm-bulk-section">
+                    <div className="ap-section-head">
+                        <h3 className="ap-title">Bulk Import (CSV)</h3>
+                        <div className="tm-bulk-hint">One task title per row · single column · header row optional</div>
+                    </div>
+
+                    <div className="tm-bulk-row">
+                        <label className="tm-bulk-picker">
+                            <input type="file" accept=".csv,text/csv,text/plain" onChange={onCsvPicked} />
+                            <span className="tm-bulk-picker-btn">Choose CSV file</span>
+                            <span className="tm-bulk-filename">{bulkFileName || "no file selected"}</span>
+                        </label>
+                    </div>
+
+                    {bulkPreview.length > 0 && isAdmin && (
+                        <div className="tm-bulk-preview">
+                            <div className="tm-bulk-preview-head">
+                                Preview · <strong>{bulkPreview.length}</strong> task(s) detected
+                            </div>
+                            <ol className="tm-bulk-list">
+                                {bulkPreview.slice(0, 25).map((t, i) => (
+                                    <li key={i}>{t}</li>
+                                ))}
+                                {bulkPreview.length > 25 && (
+                                    <li className="tm-bulk-more">…and {bulkPreview.length - 25} more</li>
+                                )}
+                            </ol>
+                            <div className="ap-form-actions">
+                                <button className="ap-ghost" onClick={cancelBulk} disabled={bulkBusy}>Cancel</button>
+                                <button className="ap-primary" onClick={submitBulk} disabled={bulkBusy}>
+                                    {bulkBusy ? "Importing…" : `Import ${bulkPreview.length} task(s)`}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+                )}
 
                 <div className="ap-section">
                     <div className="ap-section-head">
-                        <h3 className="ap-title">All Tasks</h3>
+                        <h3 className="ap-title">{isAdmin ? "All Tasks" : "My Delegated Tasks"}</h3>
                         <div className="ap-export-actions">
                             <button className="ap-export-btn ap-export-csv"
                                 onClick={() => downloadCsv("/reports/tasks/all.csv", "tasks-all.csv", token)}
@@ -310,10 +457,37 @@ const TaskManager = ({ token }) => {
                                         <td>{fmt(t.createdAt)}</td>
                                         <td>
                                             <div className="ap-row-actions">
-                                                {t.status !== "Completed" && (
-                                                    <button className="ap-ghost" onClick={() => setStatus(t, "Completed")}>Mark Done</button>
+                                                {!isAdmin && assignFor === t.id ? (
+                                                    <>
+                                                        <select
+                                                            className="tm-title-select"
+                                                            style={{ minWidth: 200 }}
+                                                            value={assignToUser}
+                                                            onChange={(e) => setAssignToUser(e.target.value)}
+                                                        >
+                                                            <option value="">Pick user…</option>
+                                                            {users
+                                                                .filter(u => Number(u.role) === 1)
+                                                                .map(u => (
+                                                                    <option key={u.id} value={u.id}>{u.fullname} ({u.email})</option>
+                                                                ))}
+                                                        </select>
+                                                        <button className="ap-primary" onClick={() => confirmAssign(t)}>Confirm</button>
+                                                        <button className="ap-ghost" onClick={cancelAssign}>Cancel</button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        {!isAdmin && (
+                                                            <button className="ap-primary" onClick={() => openAssign(t)}>Assign to User →</button>
+                                                        )}
+                                                        {isAdmin && t.status !== "Completed" && (
+                                                            <button className="ap-ghost" onClick={() => setStatus(t, "Completed")}>Mark Done</button>
+                                                        )}
+                                                        {isAdmin && (
+                                                            <button className="ap-danger" onClick={() => remove(t)}>Delete</button>
+                                                        )}
+                                                    </>
                                                 )}
-                                                <button className="ap-danger" onClick={() => remove(t)}>Delete</button>
                                             </div>
                                         </td>
                                     </tr>

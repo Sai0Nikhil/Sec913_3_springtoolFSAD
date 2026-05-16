@@ -55,6 +55,10 @@ public class Tasks {
     @Column(name = "minutes")
     Integer minutes;
 
+    /** 0 = assignee hasn't seen this assignment yet, 1 = acknowledged. Nullable for old rows. */
+    @Column(name = "notified")
+    Integer notified;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getTitle() { return title; }
@@ -79,4 +83,6 @@ public class Tasks {
     public void setHours(Integer hours) { this.hours = hours; }
     public Integer getMinutes() { return minutes; }
     public void setMinutes(Integer minutes) { this.minutes = minutes; }
+    public Integer getNotified() { return notified == null ? 1 : notified; }
+    public void setNotified(Integer notified) { this.notified = notified; }
 }

@@ -24,8 +24,12 @@ public class Users {
 	String password;
 	
 	int role;
-	
+
 	int status;
+
+	/** Nullable in the DB so older rows (NULL) don't blow up mapping. */
+	@Column(name = "can_assign_tasks")
+	Integer canAssignTasks;
 
 	public Long getId() {
 		return id;
@@ -81,5 +85,13 @@ public class Users {
 
 	public void setStatus(int status) {
 		this.status = status;
+	}
+
+	public int getCanAssignTasks() {
+		return canAssignTasks == null ? 0 : canAssignTasks;
+	}
+
+	public void setCanAssignTasks(int canAssignTasks) {
+		this.canAssignTasks = canAssignTasks;
 	}
 }

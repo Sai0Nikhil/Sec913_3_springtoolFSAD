@@ -9,6 +9,8 @@ import MyTask from './MyTask';
 import UserManager from './UserManager';
 import Dashboard from './Dashboard';
 import MyProfile from './MyProfile';
+import AssignTasks from './AssignTasks';
+import ThemeSettings, { restoreSavedTheme } from './ThemeSettings';
 
 // Decode the role claim out of a JWT without verifying the signature.
 function getRoleFromToken(t) {
@@ -54,8 +56,11 @@ const Home = () => {
     const [activeMenu, setActiveMenu] = useState(null);
     const [role, setRole] = useState(null);
     const [now, setNow] = useState(new Date());
+    const [notif, setNotif] = useState({ count: 0, tasks: [] });
+    const [notifShown, setNotifShown] = useState(false);
 
     useEffect(() => {
+        restoreSavedTheme();           // apply the user's last-picked palette ASAP
         const t = localStorage.getItem("token");
         if (!t) {
             logout();
@@ -88,9 +93,36 @@ const Home = () => {
             }
         }
 
+        // Anyone with canAssignTasks (and Admin) gets the Assign Tasks entry.
+        const canAssign = Number(res.canAssignTasks) === 1 || r === 3;
+        if (canAssign) {
+            const hasAssign = menus.some(m => (m.menu || "").toLowerCase() === "assign tasks");
+            if (!hasAssign) {
+                menus.push({ mid: 9998, menu: "Assign Tasks", icon: "taskmanager.png" });
+            }
+        }
+
         setMenuList(menus);
         if (menus.length > 0) {
             setActiveMenu(menus[0]);
+        }
+
+        // Pull pending notifications once on landing.
+        callApi("GET", apibaseurl + "/tasks/notifications", null, null, (n) => {
+            if (n && n.code === 200 && n.count > 0) {
+                setNotif({ count: n.count, tasks: Array.isArray(n.tasks) ? n.tasks : [] });
+                setNotifShown(true);
+            }
+        }, localStorage.getItem("token"));
+    }
+
+    function ackNotifications(jumpToMyTask) {
+        callApi("POST", apibaseurl + "/tasks/notifications/ack", {}, null, () => {}, localStorage.getItem("token"));
+        setNotifShown(false);
+        setNotif({ count: 0, tasks: [] });
+        if (jumpToMyTask) {
+            const m = menuList.find(x => (x.menu || "").toLowerCase().startsWith("my task"));
+            if (m) setActiveMenu(m);
         }
     }
 
@@ -124,6 +156,9 @@ const Home = () => {
         }
         if (name === "my profile" || name === "profile") {
             return <MyProfile token={token} />;
+        }
+        if (name === "assign tasks" || name === "assign task") {
+            return <AssignTasks token={token} />;
         }
         return <div className='home-content-default'>{activeMenu.menu}</div>;
     }
@@ -161,6 +196,7 @@ const Home = () => {
                         <span className='home-clock-time'>{timeStr}</span>
                         <span className='home-clock-date'>{dateStr}</span>
                     </div>
+                    <ThemeSettings />
                     <div className='home-user'>
                         <div className={'home-avatar ' + roleClass(role)}>{initialsOf(fullname)}</div>
                         <div className='home-user-info'>
@@ -210,6 +246,32 @@ const Home = () => {
 
             <ProgressBar isProgress={isProgress} />
             <FloatingBadge />
+
+            {notifShown && notif.count > 0 && (
+                <div className="home-notif" role="alert">
+                    <div className="home-notif-bell">🔔</div>
+                    <div className="home-notif-body">
+                        <div className="home-notif-title">
+                            New task{notif.count > 1 ? "s" : ""} handed to you
+                        </div>
+                        <div className="home-notif-sub">
+                            {notif.count} item{notif.count > 1 ? "s" : ""} waiting in My Task
+                        </div>
+                        {notif.tasks.slice(0, 2).map(t => (
+                            <div key={t.id} className="home-notif-task">• {t.title}</div>
+                        ))}
+                        {notif.count > 2 && (
+                            <div className="home-notif-task home-notif-more">
+                                …and {notif.count - 2} more
+                            </div>
+                        )}
+                    </div>
+                    <div className="home-notif-actions">
+                        <button className="home-notif-go" onClick={() => ackNotifications(true)}>View →</button>
+                        <button className="home-notif-x"  onClick={() => ackNotifications(false)} title="Dismiss">✕</button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

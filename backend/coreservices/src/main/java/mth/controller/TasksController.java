@@ -21,6 +21,12 @@ public class TasksController {
 		return TS.create(body, token);
 	}
 
+	@PostMapping("/bulk")
+	public Object bulkCreate(@RequestBody Map<String, Object> body,
+	                         @RequestHeader("Token") String token) {
+		return TS.bulkCreate(body, token);
+	}
+
 	@GetMapping("/all")
 	public Object listAll(@RequestHeader("Token") String token) {
 		return TS.listAll(token);
@@ -49,5 +55,15 @@ public class TasksController {
 	public Object delete(@PathVariable Long id,
 	                     @RequestHeader("Token") String token) {
 		return TS.delete(id, token);
+	}
+
+	@GetMapping("/notifications")
+	public Object notifications(@RequestHeader("Token") String token) {
+		return TS.pendingNotifications(token);
+	}
+
+	@PostMapping("/notifications/ack")
+	public Object ackNotifications(@RequestHeader("Token") String token) {
+		return TS.ackNotifications(token);
 	}
 }

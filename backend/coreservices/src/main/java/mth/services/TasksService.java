@@ -139,8 +139,13 @@ public class TasksService {
 		return response;
 	}
 
-	/** Admin: full list of every task with assignee names enriched. */
-	public Object listAll(String token) {
+	/**
+	 * Admin-only bulk import — body: { titles: ["...", "...", ...] }.
+	 * Each title becomes a new Task with status=Pending, assigneeType=ROLE, assigneeId=1
+	 * (User role) so it appears in the "Ready to Assign" queue.
+	 */
+	@Transactional
+	public Object bulkCreate(Map<String, Object> body, String token) {
 		Map<String, Object> response = new HashMap<>();
 		try {
 			Map<String, Object> claims = JWT.validateJWT(token);
@@ -150,10 +155,98 @@ public class TasksService {
 				response.put("message", "Admin only");
 				return response;
 			}
+			String email = (String) claims.get("username");
+			Users creator = (Users) usersRepo.findByEmail(email);
+
+			Object titlesObj = body.get("titles");
+			if (!(titlesObj instanceof List<?>)) {
+				response.put("code", 400);
+				response.put("message", "Body must include a `titles` array.");
+				return response;
+			}
+			List<?> raw = (List<?>) titlesObj;
+			int created = 0, skippedBlank = 0, skippedTooLong = 0;
+			List<String> errors = new ArrayList<>();
+
+			for (Object o : raw) {
+				if (o == null) { skippedBlank++; continue; }
+				String title = o.toString().trim();
+				if (title.isEmpty()) { skippedBlank++; continue; }
+				if (title.length() > 200) { skippedTooLong++; continue; }
+
+				try {
+					Tasks t = new Tasks();
+					t.setTitle(title);
+					t.setDescription("");
+					t.setStatus("Pending");
+					t.setAssigneeType("ROLE");
+					t.setAssigneeId(1L);
+					t.setCreatedBy(creator != null ? creator.getId() : null);
+					t.setCreatedAt(LocalDateTime.now());
+					repo.save(t);
+					created++;
+				} catch (Exception e) {
+					errors.add(title + ": " + e.getMessage());
+				}
+			}
+
+			response.put("code", 200);
+			response.put("message", "Bulk import complete");
+			response.put("created", created);
+			response.put("skippedBlank", skippedBlank);
+			response.put("skippedTooLong", skippedTooLong);
+			response.put("errors", errors);
+		} catch (Exception e) {
+			response.put("code", 500);
+			response.put("message", e.getMessage());
+		}
+		return response;
+	}
+
+	/**
+	 * Task Manager view, role-aware:
+	 *   • Admin   (role 3) → every task in the system.
+	 *   • Manager (role 2) → only tasks handed to them (assigneeType=USER, assigneeId=me).
+	 *   • Anyone else with canAssignTasks=1 → same as Manager (tasks delegated to them).
+	 *   • Plain Users → 403.
+	 */
+	public Object listAll(String token) {
+		Map<String, Object> response = new HashMap<>();
+		try {
+			Map<String, Object> claims = JWT.validateJWT(token);
+			Integer role = ((Number) claims.get("role")).intValue();
+			String email = (String) claims.get("username");
+			Users actor = (Users) usersRepo.findByEmail(email);
+
+			boolean isAdmin   = role != null && role == 3;
+			boolean isManager = role != null && role == 2;
+			boolean canAssign = actor != null && actor.getCanAssignTasks() == 1;
+
+			if (!isAdmin && !isManager && !canAssign) {
+				response.put("code", 403);
+				response.put("message", "Not authorized to manage tasks");
+				return response;
+			}
+
+			List<Tasks> all = repo.findAllOrdered();
+			List<Tasks> visible = new ArrayList<>();
+			if (isAdmin) {
+				visible = all;
+			} else if (actor != null) {
+				// Manager / canAssign user — only tasks delegated TO them
+				for (Tasks t : all) {
+					if ("USER".equals(t.getAssigneeType())
+					    && actor.getId().equals(t.getAssigneeId())) {
+						visible.add(t);
+					}
+				}
+			}
+
 			List<Map<String, Object>> enriched = new ArrayList<>();
-			for (Tasks t : repo.findAllOrdered()) enriched.add(enrich(t));
+			for (Tasks t : visible) enriched.add(enrich(t));
 			response.put("code", 200);
 			response.put("tasks", enriched);
+			response.put("scope", isAdmin ? "ALL" : "DELEGATED_TO_ME");
 		} catch (Exception e) {
 			response.put("code", 500);
 			response.put("message", e.getMessage());
@@ -196,23 +289,38 @@ public class TasksService {
 		try {
 			Map<String, Object> claims = JWT.validateJWT(token);
 			Integer role = ((Number) claims.get("role")).intValue();
-			if (role == null || role != 3) {
-				response.put("code", 403);
-				response.put("message", "Admin only");
-				return response;
-			}
+			String email = (String) claims.get("username");
+			Users actor = (Users) usersRepo.findByEmail(email);
 			Tasks t = repo.findById(id).orElse(null);
 			if (t == null) {
 				response.put("code", 404);
 				response.put("message", "Task not found");
 				return response;
 			}
+
+			boolean isAdmin       = role != null && role == 3;
+			boolean canAssign     = actor != null && actor.getCanAssignTasks() == 1;
+			boolean isCurrent     = actor != null
+			                       && "USER".equals(t.getAssigneeType())
+			                       && t.getAssigneeId() != null
+			                       && t.getAssigneeId().equals(actor.getId());
+			if (!isAdmin && !canAssign && !isCurrent) {
+				response.put("code", 403);
+				response.put("message", "You don't have permission to assign this task");
+				return response;
+			}
+
+			boolean assigneeChanged = false;
 			if (body.get("userId") != null) {
 				try {
 					Long uid = Long.valueOf(body.get("userId").toString());
+					assigneeChanged = !"USER".equals(t.getAssigneeType()) || !uid.equals(t.getAssigneeId());
 					t.setAssigneeType("USER");
 					t.setAssigneeId(uid);
 				} catch (Exception ignore) { }
+			}
+			if (assigneeChanged) {
+				t.setNotified(0); // new assignee hasn't seen it yet
 			}
 			if (body.get("workDate") != null && !body.get("workDate").toString().isEmpty()) {
 				try { t.setWorkDate(LocalDateTime.parse(body.get("workDate").toString())); }
@@ -275,6 +383,70 @@ public class TasksService {
 			response.put("code", 200);
 			response.put("message", "Status updated");
 			response.put("task", enrich(t));
+		} catch (Exception e) {
+			response.put("code", 500);
+			response.put("message", e.getMessage());
+		}
+		return response;
+	}
+
+	/** Tasks just handed to this user that they haven't acknowledged yet. */
+	public Object pendingNotifications(String token) {
+		Map<String, Object> response = new HashMap<>();
+		try {
+			Map<String, Object> claims = JWT.validateJWT(token);
+			String email = (String) claims.get("username");
+			Users me = (Users) usersRepo.findByEmail(email);
+			if (me == null) {
+				response.put("code", 404);
+				response.put("message", "User not found");
+				return response;
+			}
+			List<Tasks> mine = repo.findVisibleTo(me.getId(), (long) me.getRole());
+			List<Map<String, Object>> unread = new ArrayList<>();
+			for (Tasks t : mine) {
+				if (t.getNotified() != null && t.getNotified() == 0
+				    && "USER".equals(t.getAssigneeType())
+				    && me.getId().equals(t.getAssigneeId())) {
+					unread.add(enrich(t));
+				}
+			}
+			response.put("code", 200);
+			response.put("count", unread.size());
+			response.put("tasks", unread);
+		} catch (Exception e) {
+			response.put("code", 500);
+			response.put("message", e.getMessage());
+		}
+		return response;
+	}
+
+	/** Mark all of the current user's pending notifications as read. */
+	@Transactional
+	public Object ackNotifications(String token) {
+		Map<String, Object> response = new HashMap<>();
+		try {
+			Map<String, Object> claims = JWT.validateJWT(token);
+			String email = (String) claims.get("username");
+			Users me = (Users) usersRepo.findByEmail(email);
+			if (me == null) {
+				response.put("code", 404);
+				response.put("message", "User not found");
+				return response;
+			}
+			int acked = 0;
+			List<Tasks> mine = repo.findVisibleTo(me.getId(), (long) me.getRole());
+			for (Tasks t : mine) {
+				if (t.getNotified() != null && t.getNotified() == 0
+				    && "USER".equals(t.getAssigneeType())
+				    && me.getId().equals(t.getAssigneeId())) {
+					t.setNotified(1);
+					repo.save(t);
+					acked++;
+				}
+			}
+			response.put("code", 200);
+			response.put("acked", acked);
 		} catch (Exception e) {
 			response.put("code", 500);
 			response.put("message", e.getMessage());

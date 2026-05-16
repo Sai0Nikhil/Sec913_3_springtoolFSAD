@@ -44,6 +44,20 @@ const UserManager = ({ token }) => {
     const end = Math.min(start + pageSize, total);
     const pageRows = filtered.slice(start, end);
 
+    function toggleCanAssign(u) {
+        const next = Number(u.canAssignTasks) === 1 ? 0 : 1;
+        const verb = next === 1 ? "Grant" : "Revoke";
+        if (!confirm(`${verb} task-assign permission for ${u.fullname}?`)) return;
+        callApi("PATCH", apibaseurl + "/authservice/users/" + u.id + "/can-assign",
+            { canAssignTasks: next }, null, (res) => {
+                if (res && res.code === 200) {
+                    load();
+                } else {
+                    alert((res && res.message) || "Failed to update permission");
+                }
+            }, token);
+    }
+
     function exportUsersPdf() {
         downloadPdfTable({
             title: "Users",
@@ -144,6 +158,7 @@ const UserManager = ({ token }) => {
                                     <th>Phone</th>
                                     <th>Role</th>
                                     <th>Status</th>
+                                    <th>Can Assign</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -162,6 +177,22 @@ const UserManager = ({ token }) => {
                                             <span className={"ap-status " + (u.status === 1 ? "ap-status-Completed" : "ap-status-Pending")}>
                                                 {u.status === 1 ? "Active" : "Inactive"}
                                             </span>
+                                        </td>
+                                        <td>
+                                            {Number(u.role) === 3 ? (
+                                                <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>Admin</span>
+                                            ) : (
+                                                <button
+                                                    className={"ap-ghost " + (Number(u.canAssignTasks) === 1 ? "is-on" : "")}
+                                                    style={Number(u.canAssignTasks) === 1
+                                                        ? { background: '#dcfce7', borderColor: '#16a34a', color: '#166534', fontWeight: 700 }
+                                                        : null}
+                                                    onClick={() => toggleCanAssign(u)}
+                                                    title={Number(u.canAssignTasks) === 1 ? "Click to revoke" : "Click to grant"}
+                                                >
+                                                    {Number(u.canAssignTasks) === 1 ? "✓ Granted" : "Grant"}
+                                                </button>
+                                            )}
                                         </td>
                                     </tr>
                                 ))}

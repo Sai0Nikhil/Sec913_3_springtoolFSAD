@@ -1,0 +1,192 @@
+/* -------------------------------------------------------------
+   Assign Tasks — clean handover layout
+-------------------------------------------------------------- */
+
+/* Inline Add Task card */
+.at-add .at-add-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+}
+
+.at-input {
+    width: 100%;
+    box-sizing: border-box;
+    height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--background);
+    color: var(--text-dark);
+    font-size: 14px;
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+select.at-input {
+    appearance: none;
+    padding-right: 36px;
+    background-image:
+        linear-gradient(45deg, transparent 50%, var(--text-gray) 50%),
+        linear-gradient(135deg, var(--text-gray) 50%, transparent 50%);
+    background-position:
+        calc(100% - 18px) 50%,
+        calc(100% - 12px) 50%;
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+    cursor: pointer;
+}
+
+.at-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    outline: none;
+}
+
+.at-input::placeholder { color: var(--text-muted); }
+
+.at-btn-primary {
+    height: 40px;
+    padding: 0 22px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: var(--primary-color);
+    color: #fff;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background var(--transition), box-shadow var(--transition);
+    box-shadow: var(--shadow-sm);
+}
+
+.at-btn-primary:hover { background: var(--primary-hover); box-shadow: var(--shadow); }
+
+.at-btn-ghost {
+    height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--background);
+    color: var(--text-dark);
+    font-weight: 500;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background var(--transition);
+}
+
+.at-btn-ghost:hover { background: var(--background-tertiary); }
+
+/* Helper line under the section title */
+.at-hint {
+    margin: -8px 0 14px;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* ===== Task list ===== */
+.at-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.at-task {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 14px 18px;
+    background: var(--background-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    transition: background var(--transition), border-color var(--transition);
+}
+
+.at-task:hover {
+    background: var(--background);
+    border-color: var(--border-strong);
+}
+
+.at-task.is-done {
+    opacity: 0.7;
+}
+
+.at-task-main { min-width: 0; }
+
+.at-task-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-dark);
+    letter-spacing: -0.01em;
+}
+
+.at-task-meta {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--text-gray);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.at-meta-sep { color: var(--text-muted); }
+
+.at-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.at-pill-Pending    { background: #fef3c7; color: #b45309; }
+.at-pill-InProgress { background: #dbeafe; color: #1d4ed8; }
+.at-pill-Completed  { background: #dcfce7; color: #166534; }
+
+/* Handover button */
+.at-btn-handover {
+    flex-shrink: 0;
+    height: 36px;
+    padding: 0 18px;
+    border: none;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: #fff;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    transition: transform var(--transition), box-shadow var(--transition);
+    letter-spacing: 0.02em;
+}
+
+.at-btn-handover:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+}
+
+/* Inline popover for user selection */
+.at-popover {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    animation: atPop 0.16s ease-out;
+}
+
+.at-popover select { min-width: 220px; }
+
+@keyframes atPop {
+    from { opacity: 0; transform: translateX(6px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+@media (max-width: 720px) {
+    .at-task { flex-direction: column; align-items: stretch; }
+    .at-popover { flex-wrap: wrap; }
+    .at-popover select { width: 100%; }
+}

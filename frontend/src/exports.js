@@ -36,6 +36,23 @@ function triggerBlobDownload(blob, filename) {
 }
 
 /**
+ * Decode JWT payload (no signature check) — used to pull the downloader's email.
+ */
+function decodeTokenPayload(t) {
+    try {
+        if (!t) return null;
+        const parts = t.split('.');
+        if (parts.length < 2) return null;
+        const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+        return payload || null;
+    } catch { return null; }
+}
+
+const PROJECT_NAME = "Micro-Task Hub";
+const PROJECT_TAGLINE = "Admin · Task & Role Management Console";
+const FOOTER_ATTRIBUTION = "2500032630  @  Sai Nikhil   ·   Sec_913   ·   Elangovam Sir";
+
+/**
  * Branded PDF table — uses jsPDF + autoTable.
  * @param {object} opts
  *   title:    string — the heading printed at the top
@@ -43,62 +60,135 @@ function triggerBlobDownload(blob, filename) {
  *   columns:  [{ header: 'Title', dataKey: 'title' }, ...]
  *   rows:     array of objects keyed by dataKey
  *   filename: download filename (omit .pdf — added automatically)
+ *   downloadedBy: optional override; if absent we read it from the JWT in localStorage
  */
-export async function downloadPdfTable({ title, subtitle, columns, rows, filename = "report" }) {
+export async function downloadPdfTable({ title, subtitle, columns, rows, filename = "report", downloadedBy }) {
     const { default: jsPDF } = await import("jspdf");
     await import("jspdf-autotable");
 
-    const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+    const doc   = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
     const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
     const today = new Date().toLocaleString();
 
-    // ----- Header band -----
-    doc.setFillColor(15, 23, 42);                 // slate-900
-    doc.rect(0, 0, pageW, 56, "F");
-    doc.setTextColor(255, 255, 255);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.text("Micro-Task Hub", 32, 24);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    doc.text("@2500032630 Sec_913", 32, 42);
-    doc.setFontSize(9);
-    doc.text("Generated: " + today, pageW - 32, 24, { align: "right" });
-
-    // ----- Title -----
-    doc.setTextColor(15, 23, 42);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
-    doc.text(title || "Report", 32, 88);
-    if (subtitle) {
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(10);
-        doc.setTextColor(100, 116, 139);          // slate-500
-        doc.text(subtitle, 32, 104);
+    // Decode downloader from JWT if caller didn't pass one
+    if (!downloadedBy) {
+        const tok = (typeof localStorage !== "undefined") ? localStorage.getItem("token") : null;
+        const claims = decodeTokenPayload(tok);
+        downloadedBy = (claims && claims.username) ? claims.username : "—";
     }
 
-    // ----- Table -----
+    /* ------------------------------------------------------------------ */
+    /* Header band — indigo→blue gradient (stacked rectangles)             */
+    /* ------------------------------------------------------------------ */
+    const headerH = 76;
+    // Use two horizontal slices to fake a gradient
+    doc.setFillColor(30, 64, 175);   // indigo-800
+    doc.rect(0, 0, pageW, headerH * 0.6, "F");
+    doc.setFillColor(37, 99, 235);   // blue-600
+    doc.rect(0, headerH * 0.45, pageW, headerH * 0.55, "F");
+
+    // Decorative circles on the right
+    doc.setFillColor(255, 255, 255);
+    doc.setGState && doc.setGState(new doc.GState({ opacity: 0.07 }));
+    try {
+        doc.circle(pageW - 70,  20, 40, "F");
+        doc.circle(pageW - 130, 70, 24, "F");
+    } catch (e) { /* circle/gstate not critical */ }
+    if (doc.setGState) doc.setGState(new doc.GState({ opacity: 1 }));
+
+    // Left side: project mark + name
+    doc.setFillColor(255, 255, 255);
+    doc.roundedRect(28, 18, 40, 40, 8, 8, "F");
+    doc.setTextColor(37, 99, 235);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.text("MT", 48, 44, { align: "center" });
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.text(PROJECT_NAME, 80, 38);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(219, 234, 254);     // blue-100
+    doc.text(PROJECT_TAGLINE, 80, 56);
+
+    // Right side: report title + downloader + date
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    doc.text(title || "Report", pageW - 28, 32, { align: "right" });
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(219, 234, 254);
+    doc.text("Downloaded by: " + downloadedBy, pageW - 28, 50, { align: "right" });
+    doc.text("Generated: " + today,            pageW - 28, 64, { align: "right" });
+
+    /* ------------------------------------------------------------------ */
+    /* Body title + subtitle                                              */
+    /* ------------------------------------------------------------------ */
+    let cursorY = headerH + 22;
+    doc.setTextColor(15, 23, 42);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    doc.text(title || "Report", 32, cursorY);
+    cursorY += 4;
+
+    if (subtitle) {
+        cursorY += 12;
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        doc.setTextColor(100, 116, 139);     // slate-500
+        doc.text(subtitle, 32, cursorY);
+    }
+
+    // Thin blue accent line
+    cursorY += 6;
+    doc.setDrawColor(37, 99, 235);
+    doc.setLineWidth(1.5);
+    doc.line(32, cursorY, 32 + 40, cursorY);
+    cursorY += 12;
+
+    /* ------------------------------------------------------------------ */
+    /* Table                                                              */
+    /* ------------------------------------------------------------------ */
     doc.autoTable({
-        startY: subtitle ? 116 : 100,
+        startY: cursorY,
         head: [columns.map(c => c.header)],
         body: rows.map(r => columns.map(c => {
             const v = r[c.dataKey];
             return v == null ? "" : String(v);
         })),
-        margin: { left: 32, right: 32 },
-        styles: { fontSize: 9, cellPadding: 6, overflow: "linebreak" },
-        headStyles: { fillColor: [37, 99, 235], textColor: 255, fontStyle: "bold" },
+        margin: { left: 32, right: 32, bottom: 48 },
+        styles: { fontSize: 9, cellPadding: 6, overflow: "linebreak", textColor: [30, 41, 59] },
+        headStyles: {
+            fillColor: [37, 99, 235],
+            textColor: 255,
+            fontStyle: "bold",
+            halign: "left"
+        },
         alternateRowStyles: { fillColor: [248, 250, 252] },
-        didDrawPage: (data) => {
-            // Footer: page X of Y + branding
+        didDrawPage: () => {
             const pageCount = doc.internal.getNumberOfPages();
-            const pageH = doc.internal.pageSize.getHeight();
+            const pageNo   = doc.internal.getCurrentPageInfo().pageNumber;
+
+            // Footer separator line
+            doc.setDrawColor(226, 232, 240);  // slate-200
+            doc.setLineWidth(0.5);
+            doc.line(32, pageH - 30, pageW - 32, pageH - 30);
+
             doc.setFontSize(8);
-            doc.setTextColor(148, 163, 184);
-            doc.text("@2500032630 Sec_913", 32, pageH - 18);
+            doc.setTextColor(71, 85, 105);    // slate-600
+            doc.setFont("helvetica", "bold");
+            doc.text(FOOTER_ATTRIBUTION, 32, pageH - 16);
+
+            doc.setFont("helvetica", "normal");
+            doc.setTextColor(148, 163, 184);  // slate-400
             doc.text(
-                "Page " + doc.internal.getCurrentPageInfo().pageNumber + " of " + pageCount,
-                pageW - 32, pageH - 18,
+                "Page " + pageNo + " of " + pageCount + "  ·  " + PROJECT_NAME,
+                pageW - 32, pageH - 16,
                 { align: "right" }
             );
         }

@@ -3,6 +3,7 @@ import { imgurl, callApi, apibaseurl } from './lib';
 import './App.css';
 import ProgressBar from './components/ProgressBar.jsx';
 import FloatingBadge from './components/FloatingBadge.jsx';
+import { restoreSavedTheme } from './components/ThemeSettings.jsx';
 
 const App = () => {
     const [isSignin, setIsSignIn] = useState(true);
@@ -31,6 +32,7 @@ const App = () => {
     const [signupRoles, setSignupRoles] = useState([]);
 
     useEffect(() => {
+        restoreSavedTheme();
         setTimeout(() => { finput.current?.focus(); }, 0);
     }, [isSignin]);
 

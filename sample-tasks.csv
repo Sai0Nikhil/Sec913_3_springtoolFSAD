@@ -1,0 +1,16 @@
+Title
+Update Q2 invoice template
+Fix navigation contrast on mobile
+Onboarding doc for new joiners
+Migrate old logo assets to /public
+Review Sprint 14 retro notes
+Add empty-state illustration to My Task
+Audit unused npm dependencies
+Verify password reset flow end-to-end
+Plan demo script for Saturday expo
+Add favicon variants for high-DPI screens
+Tighten phone-number validation regex
+Write blog post on micro-task pattern
+Investigate 500 spike on /tasks/all
+Refresh README screenshots
+Cap Show Mappings list at 1000 rows

@@ -126,13 +126,14 @@ public class UsersService {
 			List<Map<String, Object>> users = new java.util.ArrayList<>();
 			for (Object[] r : rows) {
 				Map<String, Object> u = new HashMap<>();
-				u.put("id",       r[0]);
-				u.put("fullname", r[1]);
-				u.put("email",    r[2]);
-				u.put("phone",    r[3]);
-				u.put("role",     r[4]);
-				u.put("rolename", r[5]);
-				u.put("status",   r[6]);
+				u.put("id",              r[0]);
+				u.put("fullname",        r[1]);
+				u.put("email",           r[2]);
+				u.put("phone",           r[3]);
+				u.put("role",            r[4]);
+				u.put("rolename",        r[5]);
+				u.put("status",          r[6]);
+				u.put("canAssignTasks",  r.length > 7 ? r[7] : 0);
 				users.add(u);
 			}
 			response.put("code", 200);
@@ -246,6 +247,46 @@ public class UsersService {
 		return response;
 	}
 
+	/**
+	 * Admin-only: grant or revoke "can assign tasks" permission on a user.
+	 * Body: { canAssignTasks: 0 | 1 }
+	 */
+	public Object setCanAssign(String token, Long userId, Map<String, Object> body) {
+		Map<String, Object> response = new HashMap<>();
+		try {
+			Map<String, Object> claims = JWT.validateJWT(token);
+			Integer role = ((Number) claims.get("role")).intValue();
+			if (role == null || role != 3) {
+				response.put("code", 403);
+				response.put("message", "Admin only");
+				return response;
+			}
+
+			Users target = UR.findById(userId).orElse(null);
+			if (target == null) {
+				response.put("code", 404);
+				response.put("message", "User not found");
+				return response;
+			}
+
+			int val = 0;
+			if (body.get("canAssignTasks") != null) {
+				try { val = Integer.parseInt(body.get("canAssignTasks").toString()); }
+				catch (Exception e) { val = "true".equalsIgnoreCase(body.get("canAssignTasks").toString()) ? 1 : 0; }
+			}
+			target.setCanAssignTasks(val == 1 ? 1 : 0);
+			UR.save(target);
+
+			response.put("code", 200);
+			response.put("message", val == 1 ? "Granted assign permission" : "Revoked assign permission");
+			response.put("canAssignTasks", target.getCanAssignTasks());
+		} catch (Exception e) {
+			response.put("code", 500);
+			response.put("message", e.getMessage());
+		}
+		return response;
+	}
+
 	public Object uinfo(String token)
 	{
 		Map<String, Object> response = new HashMap<>();
@@ -264,6 +305,7 @@ public class UsersService {
 	        response.put("phone", U.getPhone());
 	        response.put("role", U.getRole());
 	        response.put("status", U.getStatus());
+	        response.put("canAssignTasks", U.getCanAssignTasks());
 	        response.put("menulist", menuList);
 		}catch(Exception e)
 		{

@@ -8,10 +8,21 @@ import { downloadCsv, downloadPdfTable, fmtDateTime } from '../exports.js';
  * Personal task view — shows tasks assigned to me by user id OR by my role.
  * I can move my tasks between Pending / InProgress / Completed.
  */
+function readRoleFromToken(t) {
+    try {
+        if (!t) return null;
+        const parts = t.split('.');
+        if (parts.length < 2) return null;
+        const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+        return payload.role == null ? null : Number(payload.role);
+    } catch { return null; }
+}
+
 const MyTask = ({ token }) => {
     const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(false);
     const [filter, setFilter] = useState("all");
+    const myRole = readRoleFromToken(token);
 
     useEffect(() => { load(); }, []);
 
@@ -19,8 +30,18 @@ const MyTask = ({ token }) => {
         setLoading(true);
         callApi("GET", apibaseurl + "/tasks/my", null, null, (res) => {
             setLoading(false);
-            if (res && Array.isArray(res.tasks)) setTasks(res.tasks);
-            else setTasks([]);
+            if (res && Array.isArray(res.tasks)) {
+                // For Managers/Admins, tasks where THEY are the USER-assignee are
+                // "delegated to manage" — those live in Task Manager, not here.
+                const personal = res.tasks.filter(t => {
+                    if (myRole === 1) return true;                  // plain users see everything
+                    if (t.assigneeType === "USER") return false;     // managers don't "do" handed-over tasks
+                    return true;                                     // ROLE-assigned ones still appear
+                });
+                setTasks(personal);
+            } else {
+                setTasks([]);
+            }
         }, token);
     }
 
