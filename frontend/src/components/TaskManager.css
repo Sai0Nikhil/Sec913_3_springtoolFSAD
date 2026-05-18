@@ -57,6 +57,33 @@
     font-style: italic;
 }
 
+/* Quick Add row — input + button side by side */
+.tm-quick-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.tm-quick-row .tm-title-input {
+    flex: 1;
+    height: 38px;
+    padding: 0 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--background);
+    color: var(--text-dark);
+    font-size: 14px;
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.tm-quick-row .tm-title-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    outline: none;
+}
+
+.tm-quick-row .tm-title-input::placeholder { color: var(--text-muted); }
+
 /* Hours + Minutes inline row */
 .tm-time-row {
     display: grid;

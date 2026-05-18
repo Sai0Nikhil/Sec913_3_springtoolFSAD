@@ -57,6 +57,11 @@ public class TasksController {
 		return TS.delete(id, token);
 	}
 
+	@GetMapping("/{id}/events")
+	public Object events(@PathVariable Long id, @RequestHeader("Token") String token) {
+		return TS.events(id, token);
+	}
+
 	@GetMapping("/notifications")
 	public Object notifications(@RequestHeader("Token") String token) {
 		return TS.pendingNotifications(token);

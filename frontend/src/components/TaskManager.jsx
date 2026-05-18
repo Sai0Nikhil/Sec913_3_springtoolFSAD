@@ -3,6 +3,7 @@ import { apibaseurl, callApi } from '../lib';
 import './AdminPages.css';
 import './TaskManager.css';
 import PageHeader from './PageHeader';
+import TaskHistory from './TaskHistory';
 import { downloadCsv, downloadPdfTable, fmtDateTime } from '../exports.js';
 
 // Pull the current user's role from the JWT so we can adapt the UI.
@@ -27,6 +28,30 @@ const TaskManager = ({ token }) => {
     // Handover/assign popover for the Manager's row-level button
     const [assignFor, setAssignFor] = useState(null);   // task id
     const [assignToUser, setAssignToUser] = useState("");
+
+    // Expanded "Activity" row id
+    const [historyFor, setHistoryFor] = useState(null);
+    const toggleHistory = (id) => setHistoryFor(prev => (prev === id ? null : id));
+
+    // Quick Add — single-input fast path at the top of the page
+    const [quickTitle, setQuickTitle] = useState("");
+    function quickAdd() {
+        const title = quickTitle.trim();
+        if (!title) { alert("Type a task name."); return; }
+        callApi("POST", apibaseurl + "/tasks", {
+            title,
+            description: "",
+            assigneeType: "ROLE",
+            assigneeId: 1
+        }, null, (res) => {
+            if (res && res.code === 200) {
+                setQuickTitle("");
+                loadTasks();
+            } else {
+                alert((res && res.message) || "Failed to add task");
+            }
+        }, token);
+    }
 
     const empty = {
         title: "",
@@ -258,6 +283,20 @@ const TaskManager = ({ token }) => {
 
             <div className="ap">
                 {isAdmin && (
+                <>
+                <div className="ap-section">
+                    <h3 className="ap-title">Quick Add Task</h3>
+                    <div className="tm-quick-row">
+                        <input
+                            className="tm-title-input"
+                            placeholder="Type a task name and press Enter…"
+                            value={quickTitle}
+                            onChange={(e) => setQuickTitle(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter') quickAdd(); }}
+                        />
+                        <button type="button" className="ap-primary" onClick={quickAdd}>Add Task</button>
+                    </div>
+                </div>
                 <div className="ap-section">
                     <h3 className="ap-title">Create New Task</h3>
                     <div className="ap-form">
@@ -333,7 +372,7 @@ const TaskManager = ({ token }) => {
                         </div>
                     </div>
                 </div>
-                )}
+                </>)}
 
                 {/* ===== Bulk CSV import (admin only) ===== */}
                 {isAdmin && (
@@ -435,7 +474,7 @@ const TaskManager = ({ token }) => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {(filter === "all" ? tasks : tasks.filter(t => t.status === filter)).map(t => (
+                                {(filter === "all" ? tasks : tasks.filter(t => t.status === filter)).flatMap(t => ([
                                     <tr key={t.id}>
                                         <td>
                                             <div style={{ fontWeight: 600 }}>{t.title}</div>
@@ -457,6 +496,9 @@ const TaskManager = ({ token }) => {
                                         <td>{fmt(t.createdAt)}</td>
                                         <td>
                                             <div className="ap-row-actions">
+                                                <button className="ap-ghost" onClick={() => toggleHistory(t.id)}>
+                                                    {historyFor === t.id ? "History ▴" : "History ▾"}
+                                                </button>
                                                 {!isAdmin && assignFor === t.id ? (
                                                     <>
                                                         <select
@@ -490,8 +532,15 @@ const TaskManager = ({ token }) => {
                                                 )}
                                             </div>
                                         </td>
-                                    </tr>
-                                ))}
+                                    </tr>,
+                                    (historyFor === t.id) && (
+                                        <tr key={t.id + "-h"} className="tm-history-row">
+                                            <td colSpan={7} style={{ background: 'var(--background-secondary)', padding: '14px 18px' }}>
+                                                <TaskHistory token={token} taskId={t.id} taskTitle={t.title} />
+                                            </td>
+                                        </tr>
+                                    )
+                                ]))}
                             </tbody>
                         </table>
                     )}

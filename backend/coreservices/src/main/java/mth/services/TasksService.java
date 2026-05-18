@@ -11,9 +11,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import mth.models.Roles;
+import mth.models.TaskEvent;
 import mth.models.Tasks;
 import mth.models.Users;
 import mth.repository.RolesRepository;
+import mth.repository.TaskEventRepository;
 import mth.repository.TasksRepository;
 import mth.repository.UsersRepository;
 
@@ -23,7 +25,22 @@ public class TasksService {
 	@Autowired TasksRepository repo;
 	@Autowired UsersRepository usersRepo;
 	@Autowired RolesRepository rolesRepo;
+	@Autowired TaskEventRepository eventRepo;
 	@Autowired JwtService JWT;
+
+	/** Helper to append one audit row. Quietly skips on any failure. */
+	private void logEvent(Long taskId, Users actor, String action, String detail) {
+		try {
+			TaskEvent e = new TaskEvent(
+				taskId,
+				actor != null ? actor.getId() : null,
+				actor != null ? actor.getFullname() : "system",
+				action,
+				detail == null ? "" : detail
+			);
+			eventRepo.save(e);
+		} catch (Exception ignore) { /* never fail user action because of audit */ }
+	}
 
 	/**
 	 * Create a new task. Admin only.
@@ -128,6 +145,7 @@ public class TasksService {
 			}
 
 			repo.save(t);
+			logEvent(t.getId(), creator, "CREATED", "Task created: " + t.getTitle());
 
 			response.put("code", 200);
 			response.put("message", "Task created");
@@ -311,6 +329,8 @@ public class TasksService {
 			}
 
 			boolean assigneeChanged = false;
+			Long previousAssignee = t.getAssigneeId();
+			String previousType    = t.getAssigneeType();
 			if (body.get("userId") != null) {
 				try {
 					Long uid = Long.valueOf(body.get("userId").toString());
@@ -321,6 +341,21 @@ public class TasksService {
 			}
 			if (assigneeChanged) {
 				t.setNotified(0); // new assignee hasn't seen it yet
+
+				// Resolve names for a readable log line
+				String fromLabel;
+				if ("USER".equals(previousType) && previousAssignee != null) {
+					fromLabel = usersRepo.findById(previousAssignee).map(Users::getFullname).orElse("User #" + previousAssignee);
+				} else if ("ROLE".equals(previousType) && previousAssignee != null) {
+					fromLabel = "Role " + rolesRepo.findById(previousAssignee).map(Roles::getRolename).orElse(previousAssignee.toString());
+				} else {
+					fromLabel = "unassigned";
+				}
+				String toLabel = usersRepo.findById(t.getAssigneeId())
+				                          .map(Users::getFullname).orElse("User #" + t.getAssigneeId());
+				logEvent(t.getId(), actor,
+				         isAdmin ? "HANDOVER" : "ASSIGN",
+				         fromLabel + "  →  " + toLabel);
 			}
 			if (body.get("workDate") != null && !body.get("workDate").toString().isEmpty()) {
 				try { t.setWorkDate(LocalDateTime.parse(body.get("workDate").toString())); }
@@ -377,8 +412,12 @@ public class TasksService {
 				response.put("message", "status must be Pending | InProgress | Completed");
 				return response;
 			}
+			String prevStatus = t.getStatus();
 			t.setStatus(newStatus);
 			repo.save(t);
+			if (!newStatus.equals(prevStatus)) {
+				logEvent(t.getId(), me, "STATUS", prevStatus + "  →  " + newStatus);
+			}
 
 			response.put("code", 200);
 			response.put("message", "Status updated");
@@ -386,6 +425,33 @@ public class TasksService {
 		} catch (Exception e) {
 			response.put("code", 500);
 			response.put("message", e.getMessage());
+		}
+		return response;
+	}
+
+	/** Activity log for a single task — anyone signed in can read it. */
+	public Object events(Long taskId, String token) {
+		Map<String, Object> response = new HashMap<>();
+		try {
+			JWT.validateJWT(token);   // just validate the token exists
+			List<TaskEvent> rows = eventRepo.findByTaskIdOrderByCreatedAtAsc(taskId);
+			List<Map<String, Object>> out = new ArrayList<>();
+			for (TaskEvent e : rows) {
+				Map<String, Object> m = new HashMap<>();
+				m.put("id",         e.getId());
+				m.put("taskId",     e.getTaskId());
+				m.put("actorId",    e.getActorId());
+				m.put("actorName",  e.getActorName());
+				m.put("action",     e.getAction());
+				m.put("detail",     e.getDetail());
+				m.put("createdAt",  e.getCreatedAt() != null ? e.getCreatedAt().toString() : null);
+				out.add(m);
+			}
+			response.put("code", 200);
+			response.put("events", out);
+		} catch (Exception ex) {
+			response.put("code", 500);
+			response.put("message", ex.getMessage());
 		}
 		return response;
 	}
@@ -466,11 +532,15 @@ public class TasksService {
 				response.put("message", "Admin only");
 				return response;
 			}
-			if (!repo.findById(id).isPresent()) {
+			Tasks doomed = repo.findById(id).orElse(null);
+			if (doomed == null) {
 				response.put("code", 404);
 				response.put("message", "Task not found");
 				return response;
 			}
+			String email = (String) claims.get("username");
+			Users actor = (Users) usersRepo.findByEmail(email);
+			logEvent(id, actor, "DELETED", "Task deleted: " + doomed.getTitle());
 			repo.deleteById(id);
 			response.put("code", 200);
 			response.put("message", "Task deleted");

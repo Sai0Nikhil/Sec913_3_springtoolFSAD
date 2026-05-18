@@ -117,9 +117,14 @@ public class UsersService {
 		{
 			Map<String, Object> claims = JWT.validateJWT(token);
 			Integer role = ((Number) claims.get("role")).intValue();
-			if (role == null || role != 3) {
+			String email = (String) claims.get("username");
+			Users actor = (Users) UR.findByEmail(email);
+			boolean isAdmin   = role != null && role == 3;
+			boolean isManager = role != null && role == 2;
+			boolean canAssign = actor != null && actor.getCanAssignTasks() == 1;
+			if (!isAdmin && !isManager && !canAssign) {
 				response.put("code", 403);
-				response.put("message", "Admin only");
+				response.put("message", "Not authorized");
 				return response;
 			}
 			List<Object[]> rows = UR.listAllWithRole();
