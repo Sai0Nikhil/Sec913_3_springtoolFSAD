@@ -28,7 +28,7 @@ const App = () => {
     const [signupData, setSignupData] = useState(emptySignup);
     const [signinData, setSigninData] = useState(emptySignin);
 
-    // Roles available for self-signup. Loaded once from /roles, with Admin filtered out.
+    // Roles available for self-signup. Loaded once from /roles, with Admin filtered out..
     const [signupRoles, setSignupRoles] = useState([]);
 
     useEffect(() => {
