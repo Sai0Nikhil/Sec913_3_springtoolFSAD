@@ -108,7 +108,15 @@
 		    <scope>runtime</scope>
 		</dependency>
 
-		
+		<!-- BCrypt password hashing.
+		     Pulled in via spring-security-crypto so we get BCryptPasswordEncoder
+		     without enabling the full Spring Security filter chain. -->
+		<dependency>
+		    <groupId>org.springframework.security</groupId>
+		    <artifactId>spring-security-crypto</artifactId>
+		    <version>6.3.4</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>

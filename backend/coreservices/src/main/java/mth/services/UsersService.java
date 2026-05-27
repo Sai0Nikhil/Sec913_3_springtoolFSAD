@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import mth.models.Users;
@@ -18,6 +19,19 @@ public class UsersService {
 	
 	@Autowired
 	JwtService JWT;
+
+	@Autowired
+	PasswordEncoder passwordEncoder;
+
+	/**
+	 * BCrypt hashes always start with $2a$ / $2b$ / $2y$ and are 60 chars long.
+	 * Anything else is treated as a legacy plaintext password and rehashed on
+	 * the next successful login or password change.
+	 */
+	private boolean isBcryptHash(String s) {
+		return s != null && s.length() == 60
+			&& (s.startsWith("$2a$") || s.startsWith("$2b$") || s.startsWith("$2y$"));
+	}
 		
 	public Object signup(Users U)
 	{
@@ -74,6 +88,8 @@ public class UsersService {
 			U.setEmail(email);
 			U.setPhone(phone);
 			U.setStatus(1);
+			// Store the BCrypt hash, never the raw password.
+			U.setPassword(passwordEncoder.encode(password));
 			UR.save(U);
 
 			response.put("code", 200);
@@ -91,14 +107,28 @@ public class UsersService {
 		Map<String, Object> response = new HashMap<>();
 		try
 		{
-			Object role = UR.validateCredentials(data.get("username").toString(), data.get("password").toString()); 	//Validate user name and password
-			if(role != null)
-			{
-				response.put("code", 200);
-				response.put("jwt", JWT.generateJWT(data.get("username"), role)); //Generate JWT token and return as response
+			String username = data.get("username") == null ? "" : data.get("username").toString().trim();
+			String password = data.get("password") == null ? "" : data.get("password").toString();
+
+			Users U = (Users) UR.findByEmail(username);
+			boolean ok = false;
+			if (U != null && U.getPassword() != null) {
+				if (isBcryptHash(U.getPassword())) {
+					ok = passwordEncoder.matches(password, U.getPassword());
+				} else {
+					// Legacy plaintext row -- accept once, then upgrade in place.
+					ok = U.getPassword().equals(password);
+					if (ok) {
+						U.setPassword(passwordEncoder.encode(password));
+						try { UR.save(U); } catch (Exception ignore) { /* upgrade is best-effort */ }
+					}
+				}
 			}
-			else
-			{
+
+			if (ok) {
+				response.put("code", 200);
+				response.put("jwt", JWT.generateJWT(username, U.getRole())); // sign with the stored role
+			} else {
 				response.put("code", 404);
 				response.put("message", "Invalid Credentials!");
 			}
@@ -224,7 +254,13 @@ public class UsersService {
 				response.put("message", "Old and new passwords are required.");
 				return response;
 			}
-			if (!U.getPassword().equals(oldP)) {
+			boolean oldOk;
+			if (isBcryptHash(U.getPassword())) {
+				oldOk = passwordEncoder.matches(oldP, U.getPassword());
+			} else {
+				oldOk = U.getPassword() != null && U.getPassword().equals(oldP);
+			}
+			if (!oldOk) {
 				response.put("code", 403);
 				response.put("message", "Current password is incorrect.");
 				return response;
@@ -240,7 +276,7 @@ public class UsersService {
 				return response;
 			}
 
-			U.setPassword(newP);
+			U.setPassword(passwordEncoder.encode(newP));
 			UR.save(U);
 
 			response.put("code", 200);

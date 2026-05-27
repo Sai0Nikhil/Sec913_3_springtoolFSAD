@@ -12,6 +12,13 @@ import mth.models.Users;
 @Repository
 public interface UsersRepository extends JpaRepository<Users, Long> {
 	
+	/**
+	 * @deprecated Plaintext password comparison. Kept only for backwards
+	 *             compatibility; do not call. Sign-in now loads the user via
+	 *             {@link #findByEmail(String)} and verifies the password with
+	 *             {@code BCryptPasswordEncoder.matches(...)}.
+	 */
+	@Deprecated
 	@Query("select U.role from Users U where U.email=:username and U.password=:password")
 	public Object validateCredentials(@Param("username") String username, @Param("password") String password);
 	

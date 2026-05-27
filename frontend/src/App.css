@@ -1,196 +1,482 @@
-/* -------------------------------------------------------------
-   Login / Signup screen — modern centered card on gradient bg
--------------------------------------------------------------- */
+/* =============================================================
+   App — scrollable landing page
+============================================================= */
 .app {
-    width: 100%;
-    height: 100%;
-    background:
-        radial-gradient(1200px 600px at 10% -10%, rgba(99, 102, 241, 0.18), transparent 60%),
-        radial-gradient(900px 500px at 100% 110%, rgba(37, 99, 235, 0.18), transparent 55%),
-        linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    min-height: 100%;
+    background: #f7f4ef;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 24px;
+    flex-direction: column;
+    font-family: 'Inter', system-ui, sans-serif;
 }
 
-.app .container {
-    width: 420px;
-    max-width: 100%;
-    border-radius: var(--radius-lg);
-    background: var(--background);
-    box-shadow: var(--shadow-lg);
-    display: grid;
-    grid-template-rows: 72px auto 36px;
-    overflow: hidden;
-    animation: fadeSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-@keyframes fadeSlideIn {
-    from {
-        opacity: 0;
-        transform: translateY(12px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.app .container .container-header {
+/* =============================================================
+   NAVBAR
+============================================================= */
+.app-nav {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 24px;
-    border-bottom: 1px solid var(--border-color);
+    padding: 0 48px;
+    height: 60px;
+    background: #f7f4ef;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
-.app .container .container-header label {
-    color: var(--text-dark);
-    font-size: 18px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
+.app-nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-.app .container .container-header img {
-    width: 110px;
-    height: 36px;
+.app-nav-logo {
+    height: 32px;
     object-fit: contain;
 }
 
-.app .container .container-content {
-    padding: 24px;
+.app-nav-name {
+    font-family: 'Poppins', 'Inter', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.01em;
+}
+
+.app-nav-cta {
+    background: #0f172a;
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 9px 22px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.18s;
+    letter-spacing: 0.01em;
+}
+
+.app-nav-cta:hover { background: #1e293b; }
+
+/* =============================================================
+   HERO
+============================================================= */
+.app-hero {
+    display: flex;
+    align-items: flex-start;
+    gap: 40px;
+    padding: 72px 48px 80px;
+    max-width: 1280px;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Left */
+.app-hero-left {
+    flex: 1;
+    padding-top: 24px;
+}
+
+.app-hero-tags {
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #2563eb;
+    margin: 0 0 20px;
+}
+
+.app-hero-title {
+    font-family: 'Poppins', 'Inter', sans-serif;
+    font-size: 58px;
+    font-weight: 900;
+    line-height: 1.05;
+    color: #0f172a;
+    margin: 0 0 20px;
+    letter-spacing: -0.03em;
+}
+
+.app-hero-title em {
+    font-style: italic;
+    color: #2563eb;
+}
+
+.app-hero-desc {
+    font-size: 15px;
+    color: #64748b;
+    line-height: 1.7;
+    max-width: 460px;
+    margin: 0 0 36px;
+}
+
+.app-hero-btn {
+    background: #c0392b;
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 13px 28px;
+    font-size: 14.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.18s, transform 0.15s;
+    letter-spacing: 0.01em;
+}
+
+.app-hero-btn:hover { background: #a93226; transform: translateY(-1px); }
+
+/* Right — form area */
+.app-hero-right {
+    width: 420px;
+    flex-shrink: 0;
+}
+
+/* =============================================================
+   FORM SHELL
+============================================================= */
+.app-form-shell {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 8px 40px rgba(15, 23, 42, 0.10), 0 2px 8px rgba(15,23,42,0.05);
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.07);
+}
+
+/* ForgotPassword lives inside the shell too */
+.app-form-shell .container {
+    width: 100%;
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
+    grid-template-rows: 60px auto 32px;
+}
+
+.app-form-top {
+    padding: 28px 28px 0;
+}
+
+.app-form-title {
+    font-family: 'Poppins', 'Inter', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 4px;
+    letter-spacing: -0.02em;
+}
+
+.app-form-sub {
+    font-size: 13px;
+    color: #94a3b8;
+    margin: 0 0 20px;
+}
+
+.app-form-body {
+    padding: 4px 28px 24px;
     display: flex;
     flex-direction: column;
 }
 
-.app .container .container-content label {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text-gray);
-    margin-bottom: 6px;
-    letter-spacing: 0.01em;
+/* Form fields */
+.app-flabel {
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    letter-spacing: 0.08em;
+    margin-bottom: 5px;
+    display: block;
 }
 
-.app .container .container-content .input-group {
+.app-finput {
+    width: 100%;
     height: 42px;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0 14px;
+    font-size: 14px;
+    color: #0f172a;
+    background: #f8fafc;
     margin-bottom: 14px;
+    box-sizing: border-box;
+    transition: border-color 0.18s, box-shadow 0.18s;
+    font-family: inherit;
+}
+
+.app-finput:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    background: #fff;
+}
+
+.app-finput.err {
+    border-color: #ef4444;
+    background: #fef2f2;
+}
+
+.app-fselect {
+    cursor: pointer;
+    appearance: auto;
+}
+
+.app-ferr {
+    font-size: 12px;
+    color: #ef4444;
+    margin: -8px 0 10px;
+}
+
+.app-forgot {
+    font-size: 12.5px;
+    color: #2563eb;
+    cursor: pointer;
+    text-align: right;
+    margin: -6px 0 16px;
+    font-weight: 500;
+}
+
+.app-forgot:hover { text-decoration: underline; }
+
+.app-fsubmit {
+    width: 100%;
+    height: 44px;
+    background: #0f172a;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14.5px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.01em;
+    transition: background 0.18s;
+    margin-bottom: 14px;
+    font-family: inherit;
+}
+
+.app-fsubmit:hover { background: #1e293b; }
+
+.app-fswitch {
+    font-size: 13px;
+    color: #64748b;
+    text-align: center;
+    margin: 0;
+}
+
+.app-fswitch span {
+    color: #2563eb;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.app-fswitch span:hover { text-decoration: underline; }
+
+/* forgot-msg used inside ForgotPassword */
+.app .forgot-msg {
+    font-size: 12px;
+    color: #16a34a;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 6px;
+    padding: 7px 12px;
+    margin: 0 0 10px;
+    text-align: center;
+    font-weight: 500;
+}
+
+/* ForgotPassword container inside the shell */
+.app-form-shell .container .container-header {
+    padding: 0 22px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.app-form-shell .container .container-header label {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.app-form-shell .container .container-header img {
+    width: 90px;
+    height: 28px;
+    object-fit: contain;
+}
+
+.app-form-shell .container .container-content {
+    padding: 18px 22px;
+}
+
+.app-form-shell .container .container-content label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+}
+
+.app-form-shell .container .container-content .input-group {
+    height: 40px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 12px;
     display: flex;
     align-items: center;
     position: relative;
-    background: var(--background);
-    transition: border-color var(--transition), box-shadow var(--transition);
+    background: #f8fafc;
+    transition: border-color 0.18s, box-shadow 0.18s;
 }
 
-.app .container .container-content .input-group:focus-within {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+.app-form-shell .container .container-content .input-group:focus-within {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    background: #fff;
 }
 
-.app .container .container-content .input-group img {
-    height: 16px;
-    width: 16px;
+.app-form-shell .container .container-content .input-group img {
+    height: 14px;
+    width: 14px;
     position: absolute;
-    left: 12px;
+    left: 11px;
     top: 50%;
     transform: translateY(-50%);
-    opacity: 0.7;
+    opacity: 0.5;
 }
 
-.app .container .container-content input {
+.app-form-shell .container .container-content input {
     width: 100%;
     height: 100%;
     border: none;
-    border-radius: var(--radius-sm);
     background: transparent;
-    padding: 0 14px 0 38px;
-    font-size: 14px;
-    color: var(--text-dark);
+    padding: 0 12px 0 32px;
+    font-size: 13.5px;
+    color: #0f172a;
 }
 
-.app .container .container-content input::placeholder {
-    color: var(--text-muted);
+.app-form-shell .container .container-content input::placeholder { color: #94a3b8; }
+
+.app-form-shell .container .container-content input.error { background: #fef2f2; }
+
+.app-form-shell .container .container-content .input-group:has(input.error) {
+    border-color: #ef4444;
 }
 
-.app .container .container-content input.error {
-    background: var(--error-background);
-}
-
-.app .container .container-content .input-group:has(input.error) {
-    border-color: var(--error);
-    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
-}
-
-.app .container .container-content p {
-    text-align: right;
-    margin: -4px 0 14px;
-    font-size: 12px;
-    color: var(--text-gray);
-}
-
-.app .container .container-content label span,
-.app .container .container-content p span {
-    color: var(--primary-color);
-    cursor: pointer;
-    font-weight: 500;
-    transition: color var(--transition);
-}
-
-.app .container .container-content label span:hover,
-.app .container .container-content p span:hover {
-    color: var(--primary-hover);
-    text-decoration: underline;
-}
-
-.app .container .container-content button {
-    height: 42px;
+.app-form-shell .container .container-content button {
+    height: 40px;
     border: none;
-    border-radius: var(--radius-sm);
-    background: var(--primary-color);
+    border-radius: 8px;
+    background: #0f172a;
     color: #fff;
     font-size: 14px;
     font-weight: 600;
-    margin: 6px 0 14px;
+    margin: 4px 0 10px;
     cursor: pointer;
-    transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
-    box-shadow: var(--shadow-sm);
-    letter-spacing: 0.01em;
+    transition: background 0.18s;
+    font-family: inherit;
 }
 
-.app .container .container-content button:hover {
-    background: var(--primary-hover);
-    box-shadow: var(--shadow);
+.app-form-shell .container .container-content button:hover { background: #1e293b; }
+
+.app-form-shell .container .container-content p {
+    font-size: 12px;
+    text-align: right;
+    color: #64748b;
+    margin: -4px 0 10px;
 }
 
-.app .container .container-content button:active {
-    transform: translateY(1px);
+.app-form-shell .container .container-content p span {
+    color: #2563eb;
+    font-weight: 500;
+    cursor: pointer;
 }
 
-.app .container .container-footer {
-    width: 100%;
+.app-form-shell .container .container-content label span {
+    color: #2563eb;
+    font-weight: 600;
+    cursor: pointer;
+    text-transform: none;
+    font-size: 13px;
+    letter-spacing: 0;
+}
+
+.app-form-shell .container .container-footer {
     font-size: 11px;
+    color: #94a3b8;
+    background: #f8fafc;
     text-align: center;
-    color: var(--text-muted);
-    background: var(--background-secondary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-top: 1px solid var(--border-color);
+    padding: 8px;
+    border-top: 1px solid #f1f5f9;
+}
+
+/* =============================================================
+   FEATURE CARDS
+============================================================= */
+.app-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: 0 48px 72px;
+    max-width: 1280px;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.app-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 28px 24px;
+    border: 1px solid rgba(0,0,0,0.07);
+    box-shadow: 0 2px 8px rgba(15,23,42,0.05);
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.app-card:hover {
+    box-shadow: 0 8px 24px rgba(15,23,42,0.10);
+    transform: translateY(-2px);
+}
+
+.app-card-icon {
+    font-size: 28px;
+    margin-bottom: 14px;
+}
+
+.app-card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 8px;
+}
+
+.app-card-desc {
+    font-size: 13.5px;
+    color: #64748b;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* =============================================================
+   FOOTER
+============================================================= */
+.app-footer {
+    margin-top: auto;
+    background: #0f172a;
+    color: rgba(255,255,255,0.45);
+    text-align: center;
+    padding: 16px;
+    font-size: 12.5px;
     letter-spacing: 0.02em;
 }
 
-.app .container .container-content select {
-    width: 100%;
-    height: 100%;
-    border: none;
-    border-radius: var(--radius-sm);
-    padding: 0 14px;
-    background: transparent;
-    font-size: 14px;
-    color: var(--text-dark);
-    cursor: pointer;
+.app-footer strong {
+    color: rgba(255,255,255,0.8);
+    font-weight: 600;
+}
+
+/* =============================================================
+   RESPONSIVE
+============================================================= */
+@media (max-width: 900px) {
+    .app-hero { flex-direction: column; padding: 40px 24px 48px; }
+    .app-hero-right { width: 100%; }
+    .app-hero-title { font-size: 38px; }
+    .app-cards { grid-template-columns: 1fr; padding: 0 24px 48px; }
+    .app-nav { padding: 0 24px; }
 }
