@@ -9,6 +9,8 @@ import { restoreSavedTheme } from './components/ThemeSettings.jsx';
 
 const MODE = { SIGNIN: "signin", SIGNUP: "signup", FORGOT: "forgot" };
 
+const HERO_TAGS = ["Tasks", "Roles", "Analytics", "Teams", "Security"];
+
 const FEATURE_CARDS = [
     {
         icon: "📊",
@@ -168,19 +170,26 @@ const App = () => {
             <section className="app-hero">
                 {/* Left — branding & tagline */}
                 <div className="app-hero-left">
-                    <p className="app-hero-tags">
-                        TASKS &nbsp;·&nbsp; ROLES &nbsp;·&nbsp; ANALYTICS &nbsp;·&nbsp; TEAMS &nbsp;·&nbsp; SECURITY
-                    </p>
+                    <div className="app-hero-tags">
+                        {HERO_TAGS.map(t => (
+                            <span key={t} className="app-hero-tag">{t}</span>
+                        ))}
+                    </div>
                     <h1 className="app-hero-title">
-                        Your <em>Micro-Task</em><br />Hub
+                        Your{' '}
+                        <span className="accent-word">Micro-Task</span>
+                        <br />Hub
                     </h1>
                     <p className="app-hero-desc">
                         A role-based task management platform built for teams —
                         assign work, track progress, and manage access from one clean dashboard.
                     </p>
-                    <button className="app-hero-btn" onClick={() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })}>
-                        Get started now
-                    </button>
+                    <div className="app-hero-actions">
+                        <button className="app-hero-btn" onClick={() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })}>
+                            Get started now →
+                        </button>
+                        <span className="app-hero-note"></span>
+                    </div>
                 </div>
 
                 {/* Right — form card */}
@@ -300,6 +309,13 @@ const App = () => {
                     </div>
                 ))}
             </section>
+
+            {/* ===== CLASS TASK BUTTON ===== */}
+            <div className="app-classtask-bar">
+                <button className="app-classtask-btn" onClick={() => window.location.href = '/0206task'}>
+                    🔐 JWT Token Lab — Class Task (06 Feb)
+                </button>
+            </div>
 
             {/* ===== FOOTER ===== */}
             <footer className="app-footer">

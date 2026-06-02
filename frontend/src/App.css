@@ -1,9 +1,9 @@
 /* =============================================================
-   App — scrollable landing page
+   App — scrollable landing page  (v2 — full visual polish)
 ============================================================= */
 .app {
     min-height: 100%;
-    background: #f7f4ef;
+    background: #f5f3ef;
     display: flex;
     flex-direction: column;
     font-family: 'Inter', system-ui, sans-serif;
@@ -16,10 +16,12 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 48px;
-    height: 60px;
-    background: #f7f4ef;
-    border-bottom: 1px solid rgba(0,0,0,0.08);
+    padding: 0 56px;
+    height: 64px;
+    background: rgba(245, 243, 239, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0,0,0,0.07);
     position: sticky;
     top: 0;
     z-index: 100;
@@ -32,14 +34,14 @@
 }
 
 .app-nav-logo {
-    height: 32px;
+    height: 30px;
     object-fit: contain;
 }
 
 .app-nav-name {
-    font-family: 'Poppins', 'Inter', sans-serif;
-    font-size: 17px;
-    font-weight: 700;
+    font-family: 'Outfit', 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
     color: #0f172a;
     letter-spacing: -0.01em;
 }
@@ -49,15 +51,20 @@
     color: #fff;
     border: none;
     border-radius: 999px;
-    padding: 9px 22px;
-    font-size: 13.5px;
+    padding: 10px 24px;
+    font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.18s;
-    letter-spacing: 0.01em;
+    transition: background 0.18s, transform 0.15s, box-shadow 0.18s;
+    letter-spacing: 0.02em;
+    box-shadow: 0 2px 8px rgba(15,23,42,0.18);
 }
 
-.app-nav-cta:hover { background: #1e293b; }
+.app-nav-cta:hover {
+    background: #1e293b;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(15,23,42,0.22);
+}
 
 /* =============================================================
    HERO
@@ -65,8 +72,8 @@
 .app-hero {
     display: flex;
     align-items: flex-start;
-    gap: 40px;
-    padding: 72px 48px 80px;
+    gap: 56px;
+    padding: 80px 56px 88px;
     max-width: 1280px;
     margin: 0 auto;
     width: 100%;
@@ -76,58 +83,95 @@
 /* Left */
 .app-hero-left {
     flex: 1;
-    padding-top: 24px;
+    padding-top: 12px;
 }
 
+/* Tag badges */
 .app-hero-tags {
-    font-size: 11.5px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 32px;
+}
+
+.app-hero-tag {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(37, 99, 235, 0.07);
     color: #2563eb;
-    margin: 0 0 20px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    padding: 5px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(37, 99, 235, 0.18);
+    text-transform: uppercase;
 }
 
 .app-hero-title {
-    font-family: 'Poppins', 'Inter', sans-serif;
-    font-size: 58px;
+    font-family: 'Outfit', 'Inter', sans-serif;
+    font-size: 66px;
     font-weight: 900;
-    line-height: 1.05;
+    line-height: 1.0;
     color: #0f172a;
-    margin: 0 0 20px;
+    margin: 0 0 24px;
     letter-spacing: -0.03em;
 }
 
-.app-hero-title em {
-    font-style: italic;
-    color: #2563eb;
+.app-hero-title .accent-word {
+    font-style: normal;
+    font-weight: 900;
+    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: inline-block;
 }
 
 .app-hero-desc {
-    font-size: 15px;
+    font-size: 15.5px;
     color: #64748b;
-    line-height: 1.7;
-    max-width: 460px;
-    margin: 0 0 36px;
+    line-height: 1.75;
+    max-width: 440px;
+    margin: 0 0 40px;
+    font-weight: 400;
+}
+
+.app-hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
 }
 
 .app-hero-btn {
-    background: #c0392b;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
     color: #fff;
     border: none;
     border-radius: 999px;
-    padding: 13px 28px;
-    font-size: 14.5px;
-    font-weight: 600;
+    padding: 14px 30px;
+    font-size: 14px;
+    font-weight: 700;
     cursor: pointer;
-    transition: background 0.18s, transform 0.15s;
-    letter-spacing: 0.01em;
+    transition: transform 0.18s, box-shadow 0.18s;
+    letter-spacing: 0.02em;
+    box-shadow: 0 4px 16px rgba(220, 38, 38, 0.28);
 }
 
-.app-hero-btn:hover { background: #a93226; transform: translateY(-1px); }
+.app-hero-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 22px rgba(220, 38, 38, 0.38);
+}
+
+.app-hero-note {
+    font-size: 12.5px;
+    color: #94a3b8;
+    font-weight: 500;
+}
 
 /* Right — form area */
 .app-hero-right {
-    width: 420px;
+    width: 430px;
     flex-shrink: 0;
 }
 
@@ -136,10 +180,12 @@
 ============================================================= */
 .app-form-shell {
     background: #fff;
-    border-radius: 18px;
-    box-shadow: 0 8px 40px rgba(15, 23, 42, 0.10), 0 2px 8px rgba(15,23,42,0.05);
+    border-radius: 20px;
+    box-shadow:
+        0 0 0 1px rgba(15,23,42,0.06),
+        0 8px 32px rgba(15, 23, 42, 0.10),
+        0 2px 8px rgba(15,23,42,0.05);
     overflow: hidden;
-    border: 1px solid rgba(0,0,0,0.07);
 }
 
 /* ForgotPassword lives inside the shell too */
@@ -152,53 +198,62 @@
 }
 
 .app-form-top {
-    padding: 28px 28px 0;
+    padding: 26px 28px 18px;
+    border-bottom: 1px solid #f1f5f9;
 }
 
 .app-form-title {
     font-family: 'Poppins', 'Inter', sans-serif;
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 800;
     color: #0f172a;
     margin: 0 0 4px;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
 }
 
 .app-form-sub {
     font-size: 13px;
     color: #94a3b8;
-    margin: 0 0 20px;
+    margin: 0;
+    font-weight: 400;
 }
 
 .app-form-body {
-    padding: 4px 28px 24px;
+    padding: 20px 28px 24px;
     display: flex;
     flex-direction: column;
 }
 
 /* Form fields */
 .app-flabel {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
-    color: #64748b;
-    letter-spacing: 0.08em;
-    margin-bottom: 5px;
+    color: #94a3b8;
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
     display: block;
+    text-transform: uppercase;
 }
 
 .app-finput {
     width: 100%;
-    height: 42px;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
+    height: 44px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
     padding: 0 14px;
-    font-size: 14px;
+    font-size: 13.5px;
     color: #0f172a;
     background: #f8fafc;
     margin-bottom: 14px;
     box-sizing: border-box;
-    transition: border-color 0.18s, box-shadow 0.18s;
+    transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
     font-family: inherit;
+    font-weight: 500;
+}
+
+.app-finput::placeholder {
+    color: #cbd5e1;
+    font-weight: 400;
 }
 
 .app-finput:focus {
@@ -219,51 +274,58 @@
 }
 
 .app-ferr {
-    font-size: 12px;
+    font-size: 11.5px;
     color: #ef4444;
     margin: -8px 0 10px;
+    font-weight: 500;
 }
 
 .app-forgot {
-    font-size: 12.5px;
+    font-size: 12px;
     color: #2563eb;
     cursor: pointer;
     text-align: right;
-    margin: -6px 0 16px;
-    font-weight: 500;
+    margin: -4px 0 16px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
 }
 
 .app-forgot:hover { text-decoration: underline; }
 
 .app-fsubmit {
     width: 100%;
-    height: 44px;
-    background: #0f172a;
+    height: 46px;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
     color: #fff;
     border: none;
-    border-radius: 8px;
-    font-size: 14.5px;
+    border-radius: 10px;
+    font-size: 14px;
     font-weight: 700;
     cursor: pointer;
-    letter-spacing: 0.01em;
-    transition: background 0.18s;
-    margin-bottom: 14px;
+    letter-spacing: 0.03em;
+    transition: transform 0.18s, box-shadow 0.18s;
+    margin-bottom: 16px;
     font-family: inherit;
+    box-shadow: 0 3px 12px rgba(15,23,42,0.18);
 }
 
-.app-fsubmit:hover { background: #1e293b; }
+.app-fsubmit:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 18px rgba(15,23,42,0.28);
+}
 
 .app-fswitch {
     font-size: 13px;
-    color: #64748b;
+    color: #94a3b8;
     text-align: center;
     margin: 0;
+    font-weight: 400;
 }
 
 .app-fswitch span {
     color: #2563eb;
     cursor: pointer;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .app-fswitch span:hover { text-decoration: underline; }
@@ -274,8 +336,8 @@
     color: #16a34a;
     background: #f0fdf4;
     border: 1px solid #bbf7d0;
-    border-radius: 6px;
-    padding: 7px 12px;
+    border-radius: 8px;
+    padding: 8px 12px;
     margin: 0 0 10px;
     text-align: center;
     font-weight: 500;
@@ -304,18 +366,18 @@
 }
 
 .app-form-shell .container .container-content label {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
-    color: #64748b;
-    letter-spacing: 0.05em;
+    color: #94a3b8;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     margin-bottom: 5px;
 }
 
 .app-form-shell .container .container-content .input-group {
-    height: 40px;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
+    height: 42px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
     margin-bottom: 12px;
     display: flex;
     align-items: center;
@@ -350,7 +412,7 @@
     color: #0f172a;
 }
 
-.app-form-shell .container .container-content input::placeholder { color: #94a3b8; }
+.app-form-shell .container .container-content input::placeholder { color: #cbd5e1; }
 
 .app-form-shell .container .container-content input.error { background: #fef2f2; }
 
@@ -359,20 +421,24 @@
 }
 
 .app-form-shell .container .container-content button {
-    height: 40px;
+    height: 42px;
     border: none;
-    border-radius: 8px;
-    background: #0f172a;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
     color: #fff;
     font-size: 14px;
     font-weight: 600;
     margin: 4px 0 10px;
     cursor: pointer;
-    transition: background 0.18s;
+    transition: transform 0.18s, box-shadow 0.18s;
     font-family: inherit;
+    box-shadow: 0 3px 10px rgba(15,23,42,0.16);
 }
 
-.app-form-shell .container .container-content button:hover { background: #1e293b; }
+.app-form-shell .container .container-content button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 16px rgba(15,23,42,0.24);
+}
 
 .app-form-shell .container .container-content p {
     font-size: 12px;
@@ -383,7 +449,7 @@
 
 .app-form-shell .container .container-content p span {
     color: #2563eb;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
 }
 
@@ -412,7 +478,7 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
-    padding: 0 48px 72px;
+    padding: 0 56px 88px;
     max-width: 1280px;
     margin: 0 auto;
     width: 100%;
@@ -421,35 +487,83 @@
 
 .app-card {
     background: #fff;
-    border-radius: 14px;
-    padding: 28px 24px;
-    border: 1px solid rgba(0,0,0,0.07);
-    box-shadow: 0 2px 8px rgba(15,23,42,0.05);
-    transition: box-shadow 0.2s, transform 0.2s;
+    border-radius: 16px;
+    padding: 30px 26px;
+    border: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 2px 12px rgba(15,23,42,0.05);
+    transition: box-shadow 0.22s, transform 0.22s;
+    position: relative;
+    overflow: hidden;
+}
+
+.app-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #2563eb, #7c3aed);
+    opacity: 0;
+    transition: opacity 0.22s;
 }
 
 .app-card:hover {
-    box-shadow: 0 8px 24px rgba(15,23,42,0.10);
-    transform: translateY(-2px);
+    box-shadow: 0 10px 32px rgba(15,23,42,0.11);
+    transform: translateY(-3px);
+}
+
+.app-card:hover::before {
+    opacity: 1;
 }
 
 .app-card-icon {
-    font-size: 28px;
-    margin-bottom: 14px;
+    font-size: 30px;
+    margin-bottom: 16px;
+    display: block;
 }
 
 .app-card-title {
-    font-size: 16px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 17px;
     font-weight: 700;
     color: #0f172a;
-    margin: 0 0 8px;
+    margin: 0 0 10px;
+    letter-spacing: -0.01em;
 }
 
 .app-card-desc {
     font-size: 13.5px;
     color: #64748b;
-    line-height: 1.6;
+    line-height: 1.65;
     margin: 0;
+}
+
+/* =============================================================
+   CLASS TASK BAR
+============================================================= */
+.app-classtask-bar {
+    display: flex;
+    justify-content: center;
+    padding: 0 56px 48px;
+}
+
+.app-classtask-btn {
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 13px 30px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Outfit', inherit;
+    letter-spacing: 0.02em;
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.28);
+    transition: transform 0.18s, box-shadow 0.18s;
+}
+
+.app-classtask-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 22px rgba(37, 99, 235, 0.38);
 }
 
 /* =============================================================
@@ -458,25 +572,34 @@
 .app-footer {
     margin-top: auto;
     background: #0f172a;
-    color: rgba(255,255,255,0.45);
+    color: rgba(255,255,255,0.4);
     text-align: center;
-    padding: 16px;
+    padding: 18px;
     font-size: 12.5px;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.03em;
 }
 
 .app-footer strong {
-    color: rgba(255,255,255,0.8);
+    color: rgba(255,255,255,0.85);
     font-weight: 600;
 }
 
 /* =============================================================
    RESPONSIVE
 ============================================================= */
-@media (max-width: 900px) {
-    .app-hero { flex-direction: column; padding: 40px 24px 48px; }
+@media (max-width: 960px) {
+    .app-hero {
+        flex-direction: column;
+        padding: 48px 28px 56px;
+        gap: 36px;
+    }
     .app-hero-right { width: 100%; }
-    .app-hero-title { font-size: 38px; }
-    .app-cards { grid-template-columns: 1fr; padding: 0 24px 48px; }
-    .app-nav { padding: 0 24px; }
+    .app-hero-title { font-size: 44px; }
+    .app-cards { grid-template-columns: 1fr; padding: 0 28px 56px; }
+    .app-nav { padding: 0 28px; }
+}
+
+@media (max-width: 480px) {
+    .app-hero-title { font-size: 36px; }
+    .app-hero-desc { font-size: 14.5px; }
 }

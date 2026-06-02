@@ -1,0 +1,370 @@
+/* ================================================================
+   JWT Token Lab — 0206task page
+================================================================ */
+.zt-page {
+    min-height: 100vh;
+    background: #f5f3ef;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* ── Back button ─────────────────────────────────────────────── */
+.zt-back-btn {
+    position: absolute;
+    top: 18px;
+    left: 24px;
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 999px;
+    padding: 7px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.18s;
+    z-index: 10;
+}
+
+.zt-back-btn:hover { background: rgba(255,255,255,0.22); }
+
+.zt-page { position: relative; }
+
+/* ── Header ──────────────────────────────────────────────────── */
+.zt-header {
+    background: #0f172a;
+    color: #fff;
+    text-align: center;
+    padding: 52px 32px 48px;
+}
+
+.zt-header-tag {
+    display: inline-block;
+    background: rgba(99, 102, 241, 0.25);
+    color: #a5b4fc;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(99, 102, 241, 0.35);
+    margin-bottom: 18px;
+}
+
+.zt-header-title {
+    font-family: 'Outfit', 'Inter', sans-serif;
+    font-size: 44px;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    margin: 0 0 12px;
+    background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.zt-header-sub {
+    font-size: 15px;
+    color: rgba(255,255,255,0.5);
+    max-width: 520px;
+    margin: 0 auto;
+    line-height: 1.65;
+}
+
+/* ── Body: two panels side by side ───────────────────────────── */
+.zt-body {
+    display: flex;
+    gap: 0;
+    align-items: flex-start;
+    padding: 40px 40px 48px;
+    max-width: 1100px;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.zt-divider {
+    font-size: 28px;
+    color: #cbd5e1;
+    padding: 0 20px;
+    margin-top: 100px;
+    flex-shrink: 0;
+}
+
+/* ── Panel ───────────────────────────────────────────────────── */
+.zt-panel {
+    flex: 1;
+    background: #fff;
+    border-radius: 18px;
+    padding: 30px 28px 28px;
+    border: 1px solid rgba(0,0,0,0.07);
+    box-shadow: 0 2px 16px rgba(15,23,42,0.07);
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.zt-panel-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.zt-step {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 800;
+    flex-shrink: 0;
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: 0.02em;
+}
+
+.zt-panel-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.01em;
+    margin-bottom: 3px;
+}
+
+.zt-panel-sub {
+    font-size: 12.5px;
+    color: #94a3b8;
+    line-height: 1.5;
+}
+
+/* ── Fields ──────────────────────────────────────────────────── */
+.zt-fields {
+    display: flex;
+    flex-direction: column;
+}
+
+.zt-field {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 14px;
+}
+
+.zt-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #94a3b8;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+.zt-input {
+    height: 44px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 0 14px;
+    font-size: 13.5px;
+    color: #0f172a;
+    background: #f8fafc;
+    box-sizing: border-box;
+    transition: border-color 0.18s, box-shadow 0.18s;
+    font-family: inherit;
+    font-weight: 500;
+}
+
+.zt-input::placeholder { color: #cbd5e1; font-weight: 400; }
+
+.zt-input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+    background: #fff;
+}
+
+.zt-textarea {
+    height: auto;
+    padding: 12px 14px;
+    resize: vertical;
+    font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+/* ── Button ──────────────────────────────────────────────────── */
+.zt-btn {
+    height: 46px;
+    width: 100%;
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: transform 0.18s, box-shadow 0.18s;
+    margin-top: 4px;
+    margin-bottom: 16px;
+    font-family: 'Outfit', inherit;
+    box-shadow: 0 3px 12px rgba(15,23,42,0.18);
+}
+
+.zt-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 18px rgba(15,23,42,0.26);
+}
+
+.zt-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.zt-btn-indigo {
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    box-shadow: 0 3px 12px rgba(37,99,235,0.22);
+}
+
+.zt-btn-indigo:hover:not(:disabled) {
+    box-shadow: 0 5px 18px rgba(37,99,235,0.32);
+}
+
+/* ── Messages ────────────────────────────────────────────────── */
+.zt-msg {
+    font-size: 13px;
+    font-weight: 500;
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-bottom: 14px;
+}
+
+.zt-msg-ok  { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+.zt-msg-err { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+
+/* ── Token output box ────────────────────────────────────────── */
+.zt-token-box {
+    background: #0f172a;
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 2px;
+}
+
+.zt-token-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.zt-copy-btn {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.7);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.18s;
+    font-family: inherit;
+}
+
+.zt-copy-btn:hover { background: rgba(255,255,255,0.15); }
+
+.zt-token-area {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: #86efac;
+    font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+    font-size: 11.5px;
+    line-height: 1.7;
+    resize: none;
+    outline: none;
+    word-break: break-all;
+    box-sizing: border-box;
+}
+
+.zt-token-hint {
+    font-size: 11px;
+    color: rgba(255,255,255,0.3);
+    margin-top: 10px;
+    line-height: 1.5;
+}
+
+/* ── Decode result ───────────────────────────────────────────── */
+.zt-result {
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 2px;
+}
+
+.zt-result-ok  { background: #f0fdf4; border: 1px solid #bbf7d0; }
+.zt-result-err { background: #fef2f2; border: 1px solid #fecaca; }
+
+.zt-result-status {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    color: inherit;
+}
+
+.zt-result-ok  .zt-result-status { color: #16a34a; }
+.zt-result-err .zt-result-status { color: #dc2626; }
+
+.zt-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.zt-td-key {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
+    padding: 5px 12px 5px 0;
+    width: 90px;
+    vertical-align: top;
+}
+
+.zt-td-val {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #0f172a;
+    padding: 5px 0;
+    word-break: break-all;
+}
+
+.zt-result-hint {
+    font-size: 12.5px;
+    color: #dc2626;
+    line-height: 1.55;
+    margin-top: 4px;
+}
+
+/* ── Footer ──────────────────────────────────────────────────── */
+.zt-footer {
+    margin-top: auto;
+    background: #0f172a;
+    color: rgba(255,255,255,0.35);
+    text-align: center;
+    padding: 14px;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 800px) {
+    .zt-body { flex-direction: column; padding: 28px 20px; }
+    .zt-divider { transform: rotate(90deg); margin: 0 auto; }
+    .zt-header-title { font-size: 32px; }
+}
